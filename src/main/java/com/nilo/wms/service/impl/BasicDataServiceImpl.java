@@ -38,6 +38,8 @@ import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 
 import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -319,7 +321,11 @@ public class BasicDataServiceImpl implements BasicDataService {
         Map<String, String> params = new HashMap<>();
         params.put("method", interfaceConfig.getMethod());
         params.put("sign", createNOSSign(data, clientConfig.getClientKey()));
-        params.put("data", data);
+        try {
+            params.put("data", URLEncoder.encode(data,"utf-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         params.put("app_key", "wms");
         params.put("country_code", "ke");
         params.put("request_id", UUID.randomUUID().toString());
@@ -418,7 +424,11 @@ public class BasicDataServiceImpl implements BasicDataService {
         Map<String, String> params = new HashMap<>();
         params.put("method", interfaceConfig.getMethod());
         params.put("sign", createNOSSign(data, clientConfig.getClientKey()));
-        params.put("data", data);
+        try {
+            params.put("data", URLEncoder.encode(data,"utf-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         params.put("app_key", "wms");
         params.put("country_code", "ke");
         params.put("request_id", UUID.randomUUID().toString());

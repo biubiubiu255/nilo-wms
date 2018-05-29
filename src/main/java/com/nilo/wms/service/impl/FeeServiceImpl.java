@@ -27,7 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -233,10 +235,14 @@ public class FeeServiceImpl implements FeeService {
         Map<String, String> params = new HashMap<>();
         params.put("method", interfaceConfig.getMethod());
         params.put("sign", createNOSSign(data, config.getClientKey()));
-        params.put("data", data);
+        try {
+            params.put("data", URLEncoder.encode(data, "utf-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         params.put("app_key", "wms");
         params.put("country_code", "ke");
-        params.put("timestamp", ""+DateUtil.getSysTimeStamp());
+        params.put("timestamp", "" + DateUtil.getSysTimeStamp());
         String request_id = UUID.randomUUID().toString();
         params.put("request_id", request_id);
         notify.setParam(params);

@@ -25,10 +25,10 @@ import com.nilo.wms.dto.flux.FLuxRequest;
 import com.nilo.wms.dto.flux.FluxInbound;
 import com.nilo.wms.dto.flux.FluxInboundDetails;
 import com.nilo.wms.dto.flux.FluxResponse;
-import com.nilo.wms.dto.inbound.InboundHeader;
-import com.nilo.wms.dto.inbound.InboundItem;
 import com.nilo.wms.dto.inbound.Inbound;
 import com.nilo.wms.dto.inbound.InboundDetail;
+import com.nilo.wms.dto.inbound.InboundHeader;
+import com.nilo.wms.dto.inbound.InboundItem;
 import com.nilo.wms.service.BasicDataService;
 import com.nilo.wms.service.HttpRequest;
 import com.nilo.wms.service.InboundService;
@@ -43,6 +43,8 @@ import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 
 import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -200,7 +202,11 @@ public class InboundServiceImpl implements InboundService {
             Map<String, String> params = new HashMap<>();
             params.put("method", interfaceConfig.getMethod());
             params.put("sign", createNOSSign(data, clientConfig.getClientKey()));
-            params.put("data", data);
+            try {
+                params.put("data", URLEncoder.encode(data,"utf-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
             params.put("app_key", "wms");
             params.put("country_code", "ke");
             params.put("request_id", UUID.randomUUID().toString());

@@ -45,6 +45,8 @@ import redis.clients.jedis.Jedis;
 import javax.annotation.Resource;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -242,7 +244,11 @@ public class OutboundServiceImpl implements OutboundService {
             Map<String, String> params = new HashMap<>();
             params.put("method", interfaceConfig.getMethod());
             params.put("sign", createNOSSign(data, clientConfig.getClientKey()));
-            params.put("data", data);
+            try {
+                params.put("data", URLEncoder.encode(data,"utf-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
             params.put("app_key", "wms");
             params.put("country_code", "ke");
             params.put("request_id", UUID.randomUUID().toString());
@@ -279,7 +285,11 @@ public class OutboundServiceImpl implements OutboundService {
         Map<String, String> paramsUpdate = new HashMap<>();
         paramsUpdate.put("method", config.getMethod());
         paramsUpdate.put("sign", createNOSSign(updateData, clientConfig.getClientKey()));
-        paramsUpdate.put("data", updateData);
+        try {
+            paramsUpdate.put("data", URLEncoder.encode(updateData,"utf-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         paramsUpdate.put("app_key", "wms");
         paramsUpdate.put("request_id", UUID.randomUUID().toString());
         paramsUpdate.put("timestamp", "" + DateUtil.getSysTimeStamp());
