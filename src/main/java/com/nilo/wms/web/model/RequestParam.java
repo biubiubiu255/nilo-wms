@@ -10,6 +10,7 @@ import com.nilo.wms.common.util.AssertUtil;
 import com.nilo.wms.common.util.StringUtil;
 import com.nilo.wms.dto.common.ClientConfig;
 import com.nilo.wms.service.config.SystemConfig;
+import com.nilo.wms.service.platform.RedisUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -117,6 +118,14 @@ public class RequestParam {
         boolean check = checkSign(config.getWmsKey(), data, sign);
         AssertUtil.isTrue(check, BizErrorCode.SIGN_ERROR);
 
+        //校验request_id是否已经存在
+        String value = RedisUtil.get(request_id);
+        if(StringUtil.isNotEmpty(value)){
+            throw new IllegalStateException("request already exist");
+        }
+
+        RedisUtil.set(request_id,"1",5);
+
         //设置调用api主体信息
         Principal principal = new Principal();
         principal.setClientCode(app_key);
@@ -124,6 +133,8 @@ public class RequestParam {
         principal.setCustomerId(config.getCustomerCode());
         principal.setWarehouseId(config.getWarehouseCode());
         SessionLocal.setPrincipal(principal);
+
+
     }
 
     private boolean checkSign(String key, String data, String sign) {

@@ -117,6 +117,18 @@ public class RedisUtil {
         }
     }
 
+    public static void set(String key, String value,int second) {
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            jedis.set(key, value);
+            jedis.expire(key,second);
+        } finally {
+            if (null != jedis) {
+                jedis.close();
+            }
+        }
+    }
     public static String get(String key) {
         Jedis jedis = null;
         try {

@@ -20,6 +20,7 @@ import com.nilo.wms.dto.platform.ApiLog;
 import com.nilo.wms.service.BasicDataService;
 import com.nilo.wms.service.InboundService;
 import com.nilo.wms.service.OutboundService;
+import com.nilo.wms.service.platform.RedisUtil;
 import com.nilo.wms.web.model.RequestParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,6 +151,9 @@ public class ApiController extends BaseController {
             addApiLog(param, e.getMessage(), false);
             log.error("API Exception ", e);
             return ResultMap.error(e.getMessage()).put("response", response).toJson();
+        }finally {
+            //清除request_id
+            RedisUtil.del(param.getRequest_id());
         }
         addApiLog(param, "SUCCESS", true);
         return ResultMap.success().put("response", response).toJson();
