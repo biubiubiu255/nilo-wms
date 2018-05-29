@@ -69,10 +69,10 @@
             and url = #{url}
         </if>
         <if test="param != null">
-            and param = #{param}
+            and param LIKE CONCAT( CONCAT('%',#{param}),'%')
         </if>
         <if test="result != null">
-            and result = #{result}
+            and result LIKE CONCAT( CONCAT('%',#{result}),'%')
         </if>
         <![CDATA[ and  created_time >= #{start_date} and created_time <= #{end_date} ]]>
         order by created_time desc
@@ -89,10 +89,10 @@
             and url = #{url}
         </if>
         <if test="param != null">
-            and param = #{param}
+            and param LIKE CONCAT( CONCAT('%',#{param}),'%')
         </if>
         <if test="result != null">
-            and result = #{result}
+            and result LIKE CONCAT( CONCAT('%',#{result}),'%')
         </if>
         <![CDATA[ and  created_time >= #{start_date} and created_time <= #{end_date} ]]>
     </select>
