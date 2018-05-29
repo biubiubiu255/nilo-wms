@@ -63,16 +63,16 @@
         <include refid="Base_Column_List"/>
         FROM t_sys_notify where 1 = 1
         <if test="notifyId != null">
-            and notify_id = #{notifyId},
+            and notify_id = #{notifyId}
         </if>
         <if test="url != null">
-            and url = #{url},
+            and url = #{url}
         </if>
         <if test="param != null">
-            and param = #{param},
+            and param = #{param}
         </if>
         <if test="result != null">
-            and result = #{result},
+            and result = #{result}
         </if>
         <![CDATA[ and  created_time >= #{start_date} and created_time <= #{end_date} ]]>
         order by created_time desc
@@ -83,16 +83,16 @@
         SELECT count(1)
         FROM t_sys_notify where 1 = 1
         <if test="notifyId != null">
-            and notify_id = #{notifyId},
+            and notify_id = #{notifyId}
         </if>
         <if test="url != null">
-            and url = #{url},
+            and url = #{url}
         </if>
         <if test="param != null">
-            and param = #{param},
+            and param = #{param}
         </if>
         <if test="result != null">
-            and result = #{result},
+            and result = #{result}
         </if>
         <![CDATA[ and  created_time >= #{start_date} and created_time <= #{end_date} ]]>
     </select>
