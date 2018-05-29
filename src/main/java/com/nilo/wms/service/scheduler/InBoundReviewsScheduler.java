@@ -31,6 +31,8 @@ public class InBoundReviewsScheduler {
                 inboundService.inboundScan();
             } catch (Exception e) {
                 logger.error("InBoundReviewsScheduler Failed.", e);
+            }finally {
+                RUN.set(false);
             }
         } else {
             logger.info("InBoundReviewsScheduler is already running.");
