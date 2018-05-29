@@ -18,7 +18,7 @@ import java.lang.reflect.Method;
 
 public class SessionInterceptor extends HandlerInterceptorAdapter {
 
-    private static final String ALLOW_URL = "/servlet/logout,/servlet/captcha/image,/servlet/login,/servlet/menu";
+    private static final String ALLOW_URL = "/servlet/logout,/servlet/captcha/image,/servlet/login,/servlet/menu,/servlet/confirmASNData.html,/servlet/confirmTRASNData.html,/servlet/confirmCGSOData.html,/servlet/confirmSOData.html";
     private static final String AJAX_HEADER_KEY = "X-Requested-With";
 
     @Override
