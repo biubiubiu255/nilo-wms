@@ -5,8 +5,10 @@
 package com.nilo.wms.web.flux;
 
 import com.nilo.wms.common.util.XmlUtil;
+import com.nilo.wms.dao.platform.ApiLogDao;
 import com.nilo.wms.dto.inbound.InboundHeader;
 import com.nilo.wms.dto.inbound.InboundItem;
+import com.nilo.wms.dto.platform.ApiLog;
 import com.nilo.wms.service.InboundService;
 import com.nilo.wms.web.BaseController;
 import com.nilo.wms.web.model.NotifyOrder;
@@ -28,7 +30,8 @@ import java.util.List;
 public class ConfirmASNDataController extends BaseController {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
+    @Autowired
+    private ApiLogDao apiLogDao;
     @Autowired
     private InboundService inboundService;
 
@@ -40,7 +43,13 @@ public class ConfirmASNDataController extends BaseController {
             logger.debug("Request confirmASNData.html -data:{}", data);
         }
         data = removeXmlDataElement(data, "xmldata");
-        inboundService.confirmASN(buildASNInfo(data));
+        try {
+            inboundService.confirmASN(buildASNInfo(data));
+        } catch (Exception e) {
+            addApiLog(data,"confirmASNData",e.getMessage(),false);
+            throw e;
+        }
+        addApiLog(data,"confirmASNData","SUCCESS",true);
         return xmlSuccessReturn();
 
     }
@@ -54,7 +63,14 @@ public class ConfirmASNDataController extends BaseController {
             logger.debug("Request confirmTRASNData.html -data:{}", data);
         }
         data = removeXmlDataElement(data, "xmldata");
-        inboundService.confirmASN(buildASNInfo(data));
+
+        try {
+            inboundService.confirmASN(buildASNInfo(data));
+        } catch (Exception e) {
+            addApiLog(data,"confirmTRASNData",e.getMessage(),false);
+            throw e;
+        }
+        addApiLog(data,"confirmTRASNData","SUCCESS",true);
         return xmlSuccessReturn();
 
     }
@@ -78,5 +94,17 @@ public class ConfirmASNDataController extends BaseController {
             list.add(asn);
         }
         return list;
+    }
+
+    private void addApiLog(String data,String method,String response,boolean result) {
+
+        ApiLog log = new ApiLog();
+        log.setAppKey("flux");
+        log.setData(data);
+        log.setMethod(method);
+        log.setSign("");
+        log.setResponse(response);
+        log.setStatus(result ? 1 : 0);
+        apiLogDao.insert(log);
     }
 }

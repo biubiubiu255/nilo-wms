@@ -2,6 +2,8 @@ package com.nilo.wms.web.flux;
 
 import com.nilo.wms.common.util.StringUtil;
 import com.nilo.wms.common.util.XmlUtil;
+import com.nilo.wms.dao.platform.ApiLogDao;
+import com.nilo.wms.dto.platform.ApiLog;
 import com.nilo.wms.service.OutboundService;
 import com.nilo.wms.web.BaseController;
 import com.nilo.wms.web.model.NotifyOrder;
@@ -22,7 +24,8 @@ import java.util.List;
 public class ConfirmSODataController extends BaseController {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
+    @Autowired
+    private ApiLogDao apiLogDao;
     @Autowired
     private OutboundService outboundService;
 
@@ -50,12 +53,19 @@ public class ConfirmSODataController extends BaseController {
                 successList.add(order.getOrderNo());
             }
         }
-        if (successList.size() > 0) {
-            outboundService.confirmSO(successList, true);
+        try {
+            if (successList.size() > 0) {
+                outboundService.confirmSO(successList, true);
+            }
+            if (cancelList.size() > 0) {
+                outboundService.confirmSO(cancelList, false);
+            }
+        } catch (Exception e) {
+            addApiLog(data, "confirmSOData", e.getMessage(), false);
+            throw e;
         }
-        if (cancelList.size() > 0) {
-            outboundService.confirmSO(cancelList, false);
-        }
+        addApiLog(data, "confirmSOData", "SUCCESS", true);
+
         return xmlSuccessReturn();
     }
 
@@ -76,9 +86,25 @@ public class ConfirmSODataController extends BaseController {
         for (NotifyOrder order : notify.getList()) {
             list.add(order.getOrderNo());
         }
-        outboundService.confirmSO(list, true);
+        try {
+            outboundService.confirmSO(list, true);
+        } catch (Exception e) {
+            addApiLog(data, "confirmCGSOData", e.getMessage(), false);
+        }
+        addApiLog(data, "confirmCGSOData", "SUCCESS", true);
         return xmlSuccessReturn();
 
     }
 
+    private void addApiLog(String data, String method, String response, boolean result) {
+
+        ApiLog log = new ApiLog();
+        log.setAppKey("flux");
+        log.setData(data);
+        log.setMethod(method);
+        log.setSign("");
+        log.setResponse(response);
+        log.setStatus(result ? 1 : 0);
+        apiLogDao.insert(log);
+    }
 }
