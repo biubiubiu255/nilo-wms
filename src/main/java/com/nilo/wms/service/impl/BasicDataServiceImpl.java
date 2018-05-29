@@ -419,7 +419,7 @@ public class BasicDataServiceImpl implements BasicDataService {
         InterfaceConfig interfaceConfig = SystemConfig.getInterfaceConfig().get(clientCode).get("update_storage");
 
         Map<String, Object> map = new HashMap<>();
-        map.put("list", list);
+        map.put("sku_list", list);
         String data = JSON.toJSONString(map);
         Map<String, String> params = new HashMap<>();
         params.put("method", interfaceConfig.getMethod());
