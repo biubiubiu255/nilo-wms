@@ -6,6 +6,7 @@ import com.nilo.mq.model.ConsumerDesc;
 import com.nilo.mq.model.NotifyRequest;
 import com.nilo.mq.model.NotifyResponse;
 import com.nilo.wms.common.util.HttpUtil;
+import com.nilo.wms.common.util.StringUtil;
 import com.nilo.wms.dao.platform.NotifyDao;
 import com.nilo.wms.dto.platform.Notify;
 import org.slf4j.Logger;
@@ -33,6 +34,9 @@ public class NotifyDataBusConsumer extends AbstractMQConsumer {
 
             request = (NotifyRequest) obj;
             response = HttpUtil.post(request.getUrl(), request.getParam());
+            if (StringUtil.isEmpty(response)) {
+                throw new RuntimeException("Http Failed. Response Empty.");
+            }
             NotifyResponse notifyResponse = JSON.parseObject(response, NotifyResponse.class);
             if (notifyResponse != null && notifyResponse.isSuccess()) {
                 saveNotify(request, msgId, response, true);
