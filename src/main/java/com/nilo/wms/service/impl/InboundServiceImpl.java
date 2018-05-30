@@ -182,14 +182,16 @@ public class InboundServiceImpl implements InboundService {
         while (iterator.hasNext()) {
             InboundHeader in = iterator.next();
             Inbound inboundDO = inboundDao.queryByReferenceNo(clientCode, in.getReferenceNo());
-            if (inboundDO == null) {
+            if (inboundDO == null || inboundDO.getStatus() == InboundStatusEnum.closed.getCode()) {
                 iterator.remove();
-            } else if (inboundDO.getStatus() == InboundStatusEnum.closed.getCode()) {
-                iterator.remove();
+            } else {
+                in.setSupplierId(inboundDO.getSupplierId());
+                in.setSupplierName(inboundDO.getSupplierName());
             }
-            in.setSupplierId(inboundDO.getSupplierId());
-            in.setSupplierName(inboundDO.getSupplierName());
         }
+
+        if (list.size() == 0) return;
+
 
         for (InboundHeader in : list) {
             Map<String, Object> map = new HashMap<>();
@@ -197,7 +199,7 @@ public class InboundServiceImpl implements InboundService {
             map.put("client_ordersn", in.getReferenceNo());
             map.put("order_type", in.getAsnType());
             String data = JSON.toJSONString(map);
-            systemService.notifyDataBus(data,clientCode,"wms_inbound_notify");
+            systemService.notifyDataBus(data, clientCode, "wms_inbound_notify");
         }
 
         //更新inbound状态
@@ -248,7 +250,6 @@ public class InboundServiceImpl implements InboundService {
         inbound.setList(list);
         return inbound;
     }
-
 
 
     @Override
