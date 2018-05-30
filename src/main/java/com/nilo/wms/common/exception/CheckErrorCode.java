@@ -55,7 +55,9 @@ public enum CheckErrorCode implements ErrorCode {
     PERMISSION_ID_EMPTY("PermissionId empty.", "100045"),
     PERMISSION_Type_EMPTY("Permission Type empty.", "100046"),
     PERMISSION_DESC_EMPTY("Permission Desc empty.", "100047"),
-
+    DESC_C_EMPTY("desc_c empty.", "100055"),
+    DESC_E_EMPTY("desc_e empty.", "100056"),
+    PRICE_EMPTY("price empty.", "100057"),
     ;
 
     private final String description;

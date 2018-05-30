@@ -20,7 +20,8 @@ public enum BizErrorCode implements ErrorCode {
     PERMISSION_ID_EXIST("permissionId is already exist.", "200013"),
     NOT_LOCK_STORAGE("need lock inventory first", "200014"),
     CLIENT_ORDER_SN_NOT_EXIST("client_ordersn not exist", "200015"),
-
+    SKU_NOT_EXIST("sku not exist", "200016"),
+    SKU_EXIST("sku exist", "200017"),
     ;
 
     private final String description;
