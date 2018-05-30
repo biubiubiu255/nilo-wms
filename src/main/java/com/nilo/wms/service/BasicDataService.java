@@ -1,11 +1,13 @@
 package com.nilo.wms.service;
 
-import com.nilo.wms.dto.*;
+import com.nilo.wms.dto.SkuInfo;
+import com.nilo.wms.dto.StorageInfo;
+import com.nilo.wms.dto.SupplierInfo;
 import com.nilo.wms.dto.common.PageResult;
 import com.nilo.wms.dto.outbound.OutboundHeader;
+import com.nilo.wms.dto.platform.parameter.StorageParam;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by admin on 2018/3/19.
@@ -28,7 +30,7 @@ public interface BasicDataService {
 
     void storageChangeNotify(List<StorageInfo> list);
 
-    void updateStorage(String sku, Integer cacheStorage,Integer lockStorage,Integer safeStorage);
+    void updateStorage(String sku, Integer cacheStorage, Integer lockStorage, Integer safeStorage);
 
     void sync(List<String> sku);
 }

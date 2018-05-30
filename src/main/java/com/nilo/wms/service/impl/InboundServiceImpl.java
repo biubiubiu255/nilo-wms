@@ -18,7 +18,6 @@ import com.nilo.wms.dao.flux.FluxInboundDao;
 import com.nilo.wms.dao.flux.SkuDao;
 import com.nilo.wms.dao.platform.InboundDao;
 import com.nilo.wms.dto.StorageInfo;
-import com.nilo.wms.dto.StorageParam;
 import com.nilo.wms.dto.common.ClientConfig;
 import com.nilo.wms.dto.common.InterfaceConfig;
 import com.nilo.wms.dto.flux.FLuxRequest;
@@ -29,6 +28,7 @@ import com.nilo.wms.dto.inbound.Inbound;
 import com.nilo.wms.dto.inbound.InboundDetail;
 import com.nilo.wms.dto.inbound.InboundHeader;
 import com.nilo.wms.dto.inbound.InboundItem;
+import com.nilo.wms.dto.platform.parameter.StorageParam;
 import com.nilo.wms.service.BasicDataService;
 import com.nilo.wms.service.HttpRequest;
 import com.nilo.wms.service.InboundService;
@@ -219,6 +219,8 @@ public class InboundServiceImpl implements InboundService {
         // 查询sku 仓库实际库存
         StorageParam param = new StorageParam();
         param.setSku(skuList);
+        param.setPage(1);
+        param.setLimit(100);
         List<StorageInfo> storageList = skuDao.queryBy(param);
 
         //获取redis锁

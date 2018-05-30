@@ -1,7 +1,7 @@
 package com.nilo.wms.dao.flux;
 
 import com.nilo.wms.dto.StorageInfo;
-import com.nilo.wms.dto.StorageParam;
+import com.nilo.wms.dto.platform.parameter.StorageParam;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
