@@ -1,5 +1,10 @@
 package com.nilo.wms.service.platform.impl;
 
+import com.nilo.mq.model.NotifyRequest;
+import com.nilo.mq.producer.AbstractMQProducer;
+import com.nilo.wms.common.exception.CheckErrorCode;
+import com.nilo.wms.common.util.AssertUtil;
+import com.nilo.wms.common.util.DateUtil;
 import com.nilo.wms.dao.platform.*;
 import com.nilo.wms.dto.common.ClientConfig;
 import com.nilo.wms.dto.common.InterfaceConfig;
@@ -10,12 +15,19 @@ import com.nilo.wms.dto.platform.parameter.RoleParam;
 import com.nilo.wms.dto.platform.system.Permission;
 import com.nilo.wms.dto.platform.system.Role;
 import com.nilo.wms.service.config.SystemConfig;
+import com.nilo.wms.service.impl.InboundServiceImpl;
 import com.nilo.wms.service.platform.RedisUtil;
 import com.nilo.wms.service.platform.SystemService;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -23,6 +35,7 @@ import java.util.*;
  */
 @Service
 public class SystemServiceImpl implements SystemService {
+    private static final Logger logger = LoggerFactory.getLogger(SystemService.class);
 
     @Autowired
     private ClientConfigDao clientConfigDao;
@@ -34,6 +47,9 @@ public class SystemServiceImpl implements SystemService {
     private RoleDao roleDao;
     @Autowired
     private PermissionDao permissionDao;
+    @Autowired
+    @Qualifier("notifyDataBusProducer")
+    private AbstractMQProducer notifyDataBusProducer;
 
     @Override
     public void loadingAndRefreshClientConfig() {
@@ -114,4 +130,38 @@ public class SystemServiceImpl implements SystemService {
 
     }
 
+    @Override
+    public void notifyDataBus(String data, String clientCode, String method) {
+
+        AssertUtil.isNotBlank(data, CheckErrorCode.DATA_EMPTY);
+
+        ClientConfig clientConfig = SystemConfig.getClientConfig().get(clientCode);
+        InterfaceConfig interfaceConfig = SystemConfig.getInterfaceConfig().get(clientCode).get(method);
+
+        Map<String, String> params = new HashMap<>();
+        params.put("method", interfaceConfig.getMethod());
+        params.put("sign", createNOSSign(data, clientConfig.getClientKey()));
+        try {
+            params.put("data", URLEncoder.encode(data, "utf-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        params.put("app_key", "wms");
+        params.put("country_code", "ke");
+        params.put("request_id", UUID.randomUUID().toString());
+        params.put("timestamp", "" + DateUtil.getSysTimeStamp());
+
+        NotifyRequest notify = new NotifyRequest();
+        notify.setParam(params);
+        notify.setUrl(interfaceConfig.getUrl());
+        try {
+            notifyDataBusProducer.sendMessage(notify);
+        } catch (Exception e) {
+            logger.error("notifyDataBus send message failed.", e);
+        }
+    }
+    private String createNOSSign(String data, String key) {
+        String str = key + data + key;
+        return DigestUtils.md5Hex(str).toUpperCase();
+    }
 }

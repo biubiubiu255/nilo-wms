@@ -1,5 +1,7 @@
 package com.nilo.wms.web.flux;
 
+import com.nilo.wms.common.Principal;
+import com.nilo.wms.common.SessionLocal;
 import com.nilo.wms.common.util.StringUtil;
 import com.nilo.wms.common.util.XmlUtil;
 import com.nilo.wms.dao.platform.ApiLogDao;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.util.HtmlUtils;
 
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -53,6 +56,9 @@ public class ConfirmSODataController extends BaseController {
                 successList.add(order.getOrderNo());
             }
         }
+        Principal principal = new Principal();
+        principal.setClientCode("kilimall");
+        SessionLocal.setPrincipal(principal);
         try {
             if (successList.size() > 0) {
                 outboundService.confirmSO(successList, true);
@@ -80,7 +86,9 @@ public class ConfirmSODataController extends BaseController {
         data = removeXmlDataElement(data, "xmldata");
         //根据wms推送的订单状态进去区分，Udf07（90）：取消； Udf07（99）已完成
         WMSOrderNotify notify = XmlUtil.XMLToBean(data, WMSOrderNotify.class);
-
+        Principal principal = new Principal();
+        principal.setClientCode("kilimall");
+        SessionLocal.setPrincipal(principal);
         List<String> list = new ArrayList<String>();
 
         for (NotifyOrder order : notify.getList()) {
@@ -100,7 +108,7 @@ public class ConfirmSODataController extends BaseController {
 
         ApiLog log = new ApiLog();
         log.setAppKey("flux");
-        log.setData(data);
+        log.setData(HtmlUtils.htmlEscape(data));
         log.setMethod(method);
         log.setSign("");
         log.setResponse(response);

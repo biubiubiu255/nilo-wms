@@ -4,6 +4,8 @@
  */
 package com.nilo.wms.web.flux;
 
+import com.nilo.wms.common.Principal;
+import com.nilo.wms.common.SessionLocal;
 import com.nilo.wms.common.util.XmlUtil;
 import com.nilo.wms.dao.platform.ApiLogDao;
 import com.nilo.wms.dto.inbound.InboundHeader;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.util.HtmlUtils;
 
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -43,13 +46,17 @@ public class ConfirmASNDataController extends BaseController {
             logger.debug("Request confirmASNData.html -data:{}", data);
         }
         data = removeXmlDataElement(data, "xmldata");
+
+        Principal principal = new Principal();
+        principal.setClientCode("kilimall");
+        SessionLocal.setPrincipal(principal);
         try {
             inboundService.confirmASN(buildASNInfo(data));
         } catch (Exception e) {
-            addApiLog(data,"confirmASNData",e.getMessage(),false);
+            addApiLog(data, "confirmASNData", e.getMessage(), false);
             throw e;
         }
-        addApiLog(data,"confirmASNData","SUCCESS",true);
+        addApiLog(data, "confirmASNData", "SUCCESS", true);
         return xmlSuccessReturn();
 
     }
@@ -64,13 +71,17 @@ public class ConfirmASNDataController extends BaseController {
         }
         data = removeXmlDataElement(data, "xmldata");
 
+        Principal principal = new Principal();
+        principal.setClientCode("kilimall");
+        SessionLocal.setPrincipal(principal);
+
         try {
             inboundService.confirmASN(buildASNInfo(data));
         } catch (Exception e) {
-            addApiLog(data,"confirmTRASNData",e.getMessage(),false);
+            addApiLog(data, "confirmTRASNData", e.getMessage(), false);
             throw e;
         }
-        addApiLog(data,"confirmTRASNData","SUCCESS",true);
+        addApiLog(data, "confirmTRASNData", "SUCCESS", true);
         return xmlSuccessReturn();
 
     }
@@ -96,11 +107,11 @@ public class ConfirmASNDataController extends BaseController {
         return list;
     }
 
-    private void addApiLog(String data,String method,String response,boolean result) {
+    private void addApiLog(String data, String method, String response, boolean result) {
 
         ApiLog log = new ApiLog();
         log.setAppKey("flux");
-        log.setData(data);
+        log.setData(HtmlUtils.htmlEscape(data));
         log.setMethod(method);
         log.setSign("");
         log.setResponse(response);

@@ -24,6 +24,7 @@
         <mvc:message-converters register-defaults="true">
             <bean class="org.springframework.http.converter.StringHttpMessageConverter">
                 <constructor-arg value="UTF-8"/>
+                <property name="writeAcceptCharset" value="false"/>
             </bean>
         </mvc:message-converters>
     </mvc:annotation-driven>

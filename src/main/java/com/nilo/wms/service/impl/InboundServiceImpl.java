@@ -34,6 +34,7 @@ import com.nilo.wms.service.HttpRequest;
 import com.nilo.wms.service.InboundService;
 import com.nilo.wms.service.config.SystemConfig;
 import com.nilo.wms.service.platform.RedisUtil;
+import com.nilo.wms.service.platform.SystemService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,13 +53,10 @@ import java.util.*;
  */
 @Service
 public class InboundServiceImpl implements InboundService {
-    private static final Logger logger = LoggerFactory.getLogger(InboundServiceImpl.class);
 
     @Resource(name = "fluxHttpRequest")
     private HttpRequest<FLuxRequest, FluxResponse> fluxHttpRequest;
-    @Autowired
-    @Qualifier("notifyDataBusProducer")
-    private AbstractMQProducer notifyDataBusProducer;
+
     @Autowired
     private InboundDao inboundDao;
     @Autowired
@@ -67,6 +65,8 @@ public class InboundServiceImpl implements InboundService {
     private BasicDataService basicDataService;
     @Autowired
     private FluxInboundDao fluxInboundDao;
+    @Autowired
+    private SystemService systemService;
 
     @Override
     public void createInBound(InboundHeader inbound) {
@@ -190,8 +190,6 @@ public class InboundServiceImpl implements InboundService {
             in.setSupplierId(inboundDO.getSupplierId());
             in.setSupplierName(inboundDO.getSupplierName());
         }
-        ClientConfig clientConfig = SystemConfig.getClientConfig().get(clientCode);
-        InterfaceConfig interfaceConfig = SystemConfig.getInterfaceConfig().get(clientCode).get("wms_inbound_notify");
 
         for (InboundHeader in : list) {
             Map<String, Object> map = new HashMap<>();
@@ -199,27 +197,7 @@ public class InboundServiceImpl implements InboundService {
             map.put("client_ordersn", in.getReferenceNo());
             map.put("order_type", in.getAsnType());
             String data = JSON.toJSONString(map);
-            Map<String, String> params = new HashMap<>();
-            params.put("method", interfaceConfig.getMethod());
-            params.put("sign", createNOSSign(data, clientConfig.getClientKey()));
-            try {
-                params.put("data", URLEncoder.encode(data,"utf-8"));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            params.put("app_key", "wms");
-            params.put("country_code", "ke");
-            params.put("request_id", UUID.randomUUID().toString());
-            params.put("timestamp", "" + DateUtil.getSysTimeStamp());
-
-            NotifyRequest notify = new NotifyRequest();
-            notify.setParam(params);
-            notify.setUrl(interfaceConfig.getUrl());
-            try {
-                notifyDataBusProducer.sendMessage(notify);
-            } catch (Exception e) {
-                logger.error("confirmSO send message failed.", e);
-            }
+            systemService.notifyDataBus(data,clientCode,"wms_inbound_notify");
         }
 
         //更新inbound状态
@@ -227,6 +205,7 @@ public class InboundServiceImpl implements InboundService {
         for (InboundHeader in : list) {
             Inbound update = new Inbound();
             update.setReferenceNo(in.getReferenceNo());
+            update.setClientCode(clientCode);
             update.setStatus(InboundStatusEnum.closed.getCode());
             inboundDao.update(update);
             for (InboundItem item : in.getItemList()) {
@@ -270,32 +249,29 @@ public class InboundServiceImpl implements InboundService {
         return inbound;
     }
 
-    private String createNOSSign(String data, String key) {
-        String str = key + data + key;
-        return DigestUtils.md5Hex(str).toUpperCase();
-    }
+
 
     @Override
     public void inboundScan() {
 
         List<InboundDetail> inboundDetails = inboundDao.queryNotComplete();  //获取wms未完成的详细列表
-        if (inboundDetails.isEmpty()){
+        if (inboundDetails.isEmpty()) {
             return;
         }
         Set<String> referenceNos = new HashSet<String>();
-        for (InboundDetail e : inboundDetails){                              //抽取wsm所有未完成的订单号Set集合
+        for (InboundDetail e : inboundDetails) {                              //抽取wsm所有未完成的订单号Set集合
             referenceNos.add(e.getReferenceNo());
         }
         List<FluxInboundDetails> fluxInboundDetails1 = fluxInboundDao.queryNotCompleteR(referenceNos);   //获取Fl未完成的详细列表
         //比对数据获取完毕
 
         //比对详细、并修改wms状态
-        for (InboundDetail e : inboundDetails){
-            for (FluxInboundDetails f : fluxInboundDetails1){
-                if(StringUtil.equals(e.getReferenceNo(), f.getReferenceNo()) && StringUtil.equals(e.getSku(), f.getSku()) && (!e.getStatus().equals(f.getStatus()) || !e.getReceiveQty().equals(f.getReceivedQty()))){
+        for (InboundDetail e : inboundDetails) {
+            for (FluxInboundDetails f : fluxInboundDetails1) {
+                if (StringUtil.equals(e.getReferenceNo(), f.getReferenceNo()) && StringUtil.equals(e.getSku(), f.getSku()) && (!e.getStatus().equals(f.getStatus()) || !e.getReceiveQty().equals(f.getReceivedQty()))) {
                     e.setStatus(Integer.valueOf(f.getStatus()).shortValue());
                     e.setReceiveQty(f.getReceivedQty());
-                    if(e.getStatus().equals(InboundStatusEnum.closed.getCode())){
+                    if (e.getStatus().equals(InboundStatusEnum.closed.getCode())) {
                         e.setReceiveTime(DateUtil.getSysTimeStamp().intValue());
                     }
                     //System.out.println("正在修改详细 = " + e);
@@ -307,11 +283,11 @@ public class InboundServiceImpl implements InboundService {
 
         //比对入库单，并修改
         Set<String> fluxRerenceNos = new HashSet<String>();
-        for (FluxInboundDetails f : fluxInboundDetails1){
+        for (FluxInboundDetails f : fluxInboundDetails1) {
             fluxRerenceNos.add(f.getReferenceNo());
         }
-        for(String e : referenceNos){
-            if (!fluxRerenceNos.contains(e)){
+        for (String e : referenceNos) {
+            if (!fluxRerenceNos.contains(e)) {
                 Inbound inbound = new Inbound();
                 inbound.setReferenceNo(e);
                 inbound.setClientCode(inboundDetails.get(inboundDetails.indexOf(e)).getClientCode());

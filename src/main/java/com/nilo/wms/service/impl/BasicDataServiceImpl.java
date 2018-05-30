@@ -29,6 +29,7 @@ import com.nilo.wms.service.BasicDataService;
 import com.nilo.wms.service.HttpRequest;
 import com.nilo.wms.service.config.SystemConfig;
 import com.nilo.wms.service.platform.RedisUtil;
+import com.nilo.wms.service.platform.SystemService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,8 +55,7 @@ public class BasicDataServiceImpl implements BasicDataService {
     @Autowired
     private SkuDao skuDao;
     @Autowired
-    @Qualifier("notifyDataBusProducer")
-    private AbstractMQProducer notifyDataBusProducer;
+    private SystemService systemService;
 
     @Override
     public void updateSku(List<SkuInfo> list) {
@@ -306,38 +306,15 @@ public class BasicDataServiceImpl implements BasicDataService {
             }
         }
         RedisUtil.del(orderNoKey);
-
         RedisUtil.releaseDistributedLock(jedis, RedisUtil.LOCK_KEY, requestId);
-
         if (lessThanSafe.size() == 0) {
             return;
         }
-        ClientConfig clientConfig = SystemConfig.getClientConfig().get(clientCode);
-        InterfaceConfig interfaceConfig = SystemConfig.getInterfaceConfig().get(clientCode).get("storage_not_enough");
-
         Map<String, Object> map = new HashMap<>();
         map.put("list", lessThanSafe);
         String data = JSON.toJSONString(map);
-        Map<String, String> params = new HashMap<>();
-        params.put("method", interfaceConfig.getMethod());
-        params.put("sign", createNOSSign(data, clientConfig.getClientKey()));
-        try {
-            params.put("data", URLEncoder.encode(data,"utf-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        params.put("app_key", "wms");
-        params.put("country_code", "ke");
-        params.put("request_id", UUID.randomUUID().toString());
-        params.put("timestamp", "" + DateUtil.getSysTimeStamp());
-        NotifyRequest notify = new NotifyRequest();
-        notify.setParam(params);
-        notify.setUrl(interfaceConfig.getUrl());
-        try {
-            notifyDataBusProducer.sendMessage(notify);
-        } catch (Exception e) {
-            logger.error("storage_not_enough send message failed.", e);
-        }
+        systemService.notifyDataBus(data, clientCode, "storage_not_enough");
+
     }
 
     @Override
@@ -413,35 +390,12 @@ public class BasicDataServiceImpl implements BasicDataService {
     public void storageChangeNotify(List<StorageInfo> list) {
 
         if (list == null || list.size() == 0) return;
-
         String clientCode = SessionLocal.getPrincipal().getClientCode();
-        ClientConfig clientConfig = SystemConfig.getClientConfig().get(clientCode);
-        InterfaceConfig interfaceConfig = SystemConfig.getInterfaceConfig().get(clientCode).get("update_storage");
-
         Map<String, Object> map = new HashMap<>();
         map.put("sku_list", list);
         String data = JSON.toJSONString(map);
-        Map<String, String> params = new HashMap<>();
-        params.put("method", interfaceConfig.getMethod());
-        params.put("sign", createNOSSign(data, clientConfig.getClientKey()));
-        try {
-            params.put("data", URLEncoder.encode(data,"utf-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        params.put("app_key", "wms");
-        params.put("country_code", "ke");
-        params.put("request_id", UUID.randomUUID().toString());
-        params.put("timestamp", "" + DateUtil.getSysTimeStamp());
+        systemService.notifyDataBus(data,clientCode,"update_storage");
 
-        NotifyRequest notify = new NotifyRequest();
-        notify.setParam(params);
-        notify.setUrl(interfaceConfig.getUrl());
-        try {
-            notifyDataBusProducer.sendMessage(notify);
-        } catch (Exception e) {
-            logger.error("update_storage send message failed.", e);
-        }
     }
 
     @Override

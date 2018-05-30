@@ -1,36 +1,29 @@
 package com.nilo.wms.service.impl;
 
 import com.alibaba.fastjson.JSON;
-
-import com.nilo.mq.model.NotifyRequest;
 import com.nilo.wms.common.Principal;
 import com.nilo.wms.common.SessionLocal;
 import com.nilo.wms.common.exception.BizErrorCode;
 import com.nilo.wms.common.exception.WMSException;
-import com.nilo.wms.common.util.DateUtil;
-import com.nilo.wms.common.util.MailInfo;
-import com.nilo.wms.common.util.SendEmailUtil;
 import com.nilo.wms.common.util.StringUtil;
 import com.nilo.wms.dao.flux.WMSFeeDao;
-import com.nilo.mq.producer.AbstractMQProducer;
 import com.nilo.wms.dto.common.ClientConfig;
-import com.nilo.wms.dto.common.InterfaceConfig;
 import com.nilo.wms.dto.fee.Fee;
 import com.nilo.wms.dto.fee.FeeDO;
 import com.nilo.wms.dto.fee.FeePrice;
 import com.nilo.wms.service.FeeService;
 import com.nilo.wms.service.config.SystemConfig;
-import org.apache.commons.codec.digest.DigestUtils;
+import com.nilo.wms.service.platform.SystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2017/6/9.
@@ -42,8 +35,7 @@ public class FeeServiceImpl implements FeeService {
     @Autowired
     private WMSFeeDao feeDao;
     @Autowired
-    @Qualifier("notifyDataBusProducer")
-    private AbstractMQProducer notifyDataBusProducer;
+    private SystemService systemService;
 
     @Override
     public List<Fee> queryStorageFee(String clientCode, String date) {
@@ -219,10 +211,6 @@ public class FeeServiceImpl implements FeeService {
         principal.setWarehouseId(config.getWarehouseCode());
         SessionLocal.setPrincipal(principal);
 
-        InterfaceConfig interfaceConfig = SystemConfig.getInterfaceConfig().get(clientCode).get("wms_fee");
-
-
-        //写入 nos
         Map<String, Object> map = new HashMap<>();
         map.put("list", list);
         map.put("date", date);
@@ -230,40 +218,7 @@ public class FeeServiceImpl implements FeeService {
         map.put("charge_type", "1");
         map.put("money_type", moneyType);
         String data = JSON.toJSONString(map);
-        NotifyRequest notify = new NotifyRequest();
-
-        Map<String, String> params = new HashMap<>();
-        params.put("method", interfaceConfig.getMethod());
-        params.put("sign", createNOSSign(data, config.getClientKey()));
-        try {
-            params.put("data", URLEncoder.encode(data, "utf-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        params.put("app_key", "wms");
-        params.put("country_code", "ke");
-        params.put("timestamp", "" + DateUtil.getSysTimeStamp());
-        String request_id = UUID.randomUUID().toString();
-        params.put("request_id", request_id);
-        notify.setParam(params);
-        notify.setUrl(interfaceConfig.getUrl());
-        try {
-            notifyDataBusProducer.sendMessage(notify);
-        } catch (Exception e) {
-            MailInfo mailInfo = new MailInfo();
-            mailInfo.setSubject("WMS Fee Type: " + moneyType + " Date: " + date + " Notify Failed");
-            List to = new ArrayList<>();
-            to.add("ronny.zeng@kilimall.com");
-            mailInfo.setToAddress(to);
-            mailInfo.setContent(request_id);
-            SendEmailUtil.sendEmail(mailInfo);
-            logger.error("WMS Fee send message failed.", e);
-        }
-    }
-
-    private String createNOSSign(String data, String key) {
-        String str = key + data + key;
-        return DigestUtils.md5Hex(str).toUpperCase();
+        systemService.notifyDataBus(data, clientCode, "wms_fee");
     }
 
     /**

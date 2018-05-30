@@ -26,4 +26,6 @@ public interface SystemService {
      */
     void loadingAndRefreshRole();
 
+
+    void notifyDataBus(String data,String clientCode,String method);
 }

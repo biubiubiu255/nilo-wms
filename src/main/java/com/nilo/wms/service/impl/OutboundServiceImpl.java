@@ -1,8 +1,6 @@
 package com.nilo.wms.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.nilo.mq.model.NotifyRequest;
-import com.nilo.mq.producer.AbstractMQProducer;
 import com.nilo.wms.common.Principal;
 import com.nilo.wms.common.SessionLocal;
 import com.nilo.wms.common.enums.OutBoundStatusEnum;
@@ -18,8 +16,6 @@ import com.nilo.wms.dao.flux.FluxOutboundDao;
 import com.nilo.wms.dao.platform.OutboundDao;
 import com.nilo.wms.dao.platform.OutboundItemDao;
 import com.nilo.wms.dto.StorageInfo;
-import com.nilo.wms.dto.common.ClientConfig;
-import com.nilo.wms.dto.common.InterfaceConfig;
 import com.nilo.wms.dto.flux.FLuxRequest;
 import com.nilo.wms.dto.flux.FluxOutbound;
 import com.nilo.wms.dto.flux.FluxResponse;
@@ -31,13 +27,11 @@ import com.nilo.wms.dto.platform.outbound.OutboundDetail;
 import com.nilo.wms.service.BasicDataService;
 import com.nilo.wms.service.HttpRequest;
 import com.nilo.wms.service.OutboundService;
-import com.nilo.wms.service.config.SystemConfig;
 import com.nilo.wms.service.platform.RedisUtil;
-import org.apache.commons.codec.digest.DigestUtils;
+import com.nilo.wms.service.platform.SystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import redis.clients.jedis.Jedis;
@@ -45,8 +39,6 @@ import redis.clients.jedis.Jedis;
 import javax.annotation.Resource;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -59,8 +51,7 @@ public class OutboundServiceImpl implements OutboundService {
     @Resource(name = "fluxHttpRequest")
     private HttpRequest<FLuxRequest, FluxResponse> fluxHttpRequest;
     @Autowired
-    @Qualifier("notifyDataBusProducer")
-    private AbstractMQProducer notifyDataBusProducer;
+    private SystemService systemService;
     @Autowired
     private OutboundDao outboundDao;
     @Autowired
@@ -226,8 +217,6 @@ public class OutboundServiceImpl implements OutboundService {
         if (outList == null || outList.size() == 0) {
             throw new WMSException(BizErrorCode.OUTBOUND_NOT_EXIST);
         }
-        ClientConfig clientConfig = SystemConfig.getClientConfig().get(clientCode);
-        InterfaceConfig interfaceConfig = SystemConfig.getInterfaceConfig().get(clientCode).get("wms_outbound_notify");
 
         for (Outbound out : outList) {
             Map<String, Object> map = new HashMap<>();
@@ -238,70 +227,22 @@ public class OutboundServiceImpl implements OutboundService {
             }
             map.put("client_ordersn", out.getReferenceNo());
             map.put("order_type", out.getOrderType());
-
             String data = JSON.toJSONString(map);
-
-            Map<String, String> params = new HashMap<>();
-            params.put("method", interfaceConfig.getMethod());
-            params.put("sign", createNOSSign(data, clientConfig.getClientKey()));
-            try {
-                params.put("data", URLEncoder.encode(data,"utf-8"));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            params.put("app_key", "wms");
-            params.put("country_code", "ke");
-            params.put("request_id", UUID.randomUUID().toString());
-            params.put("timestamp", "" + DateUtil.getSysTimeStamp());
-
-            // 通知状态变更
-            NotifyRequest notify = new NotifyRequest();
-            notify.setParam(params);
-            notify.setUrl(interfaceConfig.getUrl());
-            try {
-                notifyDataBusProducer.sendMessage(notify);
-            } catch (Exception e) {
-                logger.error("confirmSO send message failed.", e);
-            }
+            systemService.notifyDataBus(data, clientCode, "wms_outbound_notify");
         }
-
         // 修改DMS重量
         List<String> waybillList = new ArrayList<>();
         for (Outbound o : outList) {
             waybillList.add(o.getWaybillNum());
         }
         notifyWeight(waybillList);
-
     }
 
     private void notifyWeight(List<String> list) {
-
         String clientCode = SessionLocal.getPrincipal().getClientCode();
-
-        ClientConfig clientConfig = SystemConfig.getClientConfig().get(clientCode);
-        InterfaceConfig config = SystemConfig.getInterfaceConfig().get(clientCode).get("update_weight");
         List<FluxWeight> weightList = fluxOutboundDao.queryWeight(list);
         String updateData = JSON.toJSONString(weightList);
-        Map<String, String> paramsUpdate = new HashMap<>();
-        paramsUpdate.put("method", config.getMethod());
-        paramsUpdate.put("sign", createNOSSign(updateData, clientConfig.getClientKey()));
-        try {
-            paramsUpdate.put("data", URLEncoder.encode(updateData,"utf-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        paramsUpdate.put("app_key", "wms");
-        paramsUpdate.put("request_id", UUID.randomUUID().toString());
-        paramsUpdate.put("timestamp", "" + DateUtil.getSysTimeStamp());
-        paramsUpdate.put("country_code", "ke");
-        NotifyRequest notify = new NotifyRequest();
-        notify.setParam(paramsUpdate);
-        notify.setUrl(config.getUrl());
-        try {
-            notifyDataBusProducer.sendMessage(notify);
-        } catch (Exception e) {
-            logger.error("confirmSO send message failed.", e);
-        }
+        systemService.notifyDataBus(updateData, clientCode, "update_weight");
     }
 
     @Override
@@ -315,11 +256,6 @@ public class OutboundServiceImpl implements OutboundService {
         if (order == null) throw new WMSException(BizErrorCode.CLIENT_ORDER_SN_NOT_EXIST);
         order.setStatusDesc(OutBoundStatusEnum.getEnum(order.getStatus()).getDesc_e());
         return order;
-    }
-
-    private String createNOSSign(String data, String key) {
-        String str = key + data + key;
-        return DigestUtils.md5Hex(str).toUpperCase();
     }
 
     @XmlRootElement(name = "ordernos")
