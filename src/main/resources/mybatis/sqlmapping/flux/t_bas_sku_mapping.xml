@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nilo.wms.dao.platform.SkuDao">
+
+    <!-- 实体bean与数据字段对应关系 -->
+    <resultMap id="sku" type="com.nilo.wms.dto.platform.Sku">
+        <result property="id" column="id" javaType="java.lang.Integer"
+                jdbcType="INTEGER"/>
+        <result property="customerId" column="customer_id" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="sku" column="sku" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="desc_c" column="desc_c" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="desc_e" column="desc_e" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+
+        <result property="status" column="status" javaType="java.lang.Integer"
+                jdbcType="INTEGER"/>
+        <result property="length" column="length" javaType="java.lang.Integer"
+                jdbcType="INTEGER"/>
+        <result property="width" column="width" javaType="java.lang.Integer"
+                jdbcType="INTEGER"/>
+        <result property="height" column="height" javaType="java.lang.Integer"
+                jdbcType="INTEGER"/>
+        <result property="weight" column="weight" javaType="java.lang.Integer"
+                jdbcType="INTEGER"/>
+        <result property="price" column="price" javaType="java.lang.Integer"
+                jdbcType="INTEGER"/>
+        <result property="cube" column="cube" javaType="java.lang.Integer"
+                jdbcType="INTEGER"/>
+
+        <result property="freightClass" column="freight_class" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="image" column="image" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+
+        <result property="createdTime" column="created_time" javaType="java.lang.Long"
+                jdbcType="INTEGER"/>
+        <result property="updatedTime" column="updated_time" javaType="java.lang.Long"
+                jdbcType="INTEGER"/>
+        <result property="createdBy" column="created_by" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="updatedBy" column="updated_by" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="version" column="version" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,customer_id,sku,desc_c,desc_e,status,length,width,height,weight,freight_class,price,image,cube,
+        created_by,created_time,updated_by,updated_time,version
+    </sql>
+
+    <!-- 插入语句 -->
+    <insert id="insert" parameterType="com.nilo.wms.dto.basic.Sku" statementType="PREPARED"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO t_bas_sku
+        (customer_id,sku,desc_c,desc_e,status,length,width,height,weight,freight_class,price,image,cube,
+        created_by,created_time,updated_by,updated_time,version)
+        VALUES
+        (#{customerId}, #{sku}, #{desc_c},#{desc_e},#{status},#{length},#{width},#{height},#{weight},#{freightClass},#{price},#{image},#{cube},#{createdBy},UNIX_TIMESTAMP(NOW()),#{updatedBy}, UNIX_TIMESTAMP(NOW()), UUID())
+    </insert>
+
+    <!-- 动态更新语句 -->
+    <update id="update" parameterType="com.nilo.wms.dto.basic.Sku" statementType="PREPARED">
+        update t_bas_sku
+        <trim prefix="set" suffixOverrides="," suffix="where sku=#{sku}">
+            <if test="desc_c != null and desc_c != ''">
+                desc_c = #{desc_c},
+            </if>
+            <if test="desc_e != null and desc_e != ''">
+                desc_e = #{desc_e},
+            </if>
+            <if test="status != null ">
+                status = #{status},
+            </if>
+            <if test="length != null ">
+                length = #{length},
+            </if>
+            <if test="width != null ">
+                width = #{width},
+            </if>
+            <if test="height != null ">
+                height = #{height},
+            </if>
+            <if test="weight != null ">
+                weight = #{weight},
+            </if>
+            <if test="freightClass != null and freightClass != ''">
+                freight_class = #{freightClass},
+            </if>
+            <if test="cube != null and cube != ''">
+                cube = #{cube},
+            </if>
+            <if test="image != null and image != ''">
+                image = #{image},
+            </if>
+            <if test="price != null and price != ''">
+                price = #{price},
+            </if>
+        </trim>
+    </update>
+
+    <delete id="deleteBySku">
+        delete from t_bas_sku where sku = #{sku}
+    </delete>
+
+    <select id="queryBySku" resultMap="sku" statementType="PREPARED">
+        SELECT
+        *
+        FROM t_bas_sku
+        WHERE sku = #{sku}
+    </select>
+
+    <select id="queryBy" resultMap="sku" statementType="PREPARED">
+        SELECT
+        *
+        FROM t_bas_sku
+        WHERE 1 = 1
+        <if test="customerId != null and customerId != ''">
+            and customer_id = #{customerId}
+        </if>
+        <if test="sku != null and sku != ''">
+            and sku = #{sku}
+        </if>
+        <if test="desc != null and desc != ''">
+            and (desc_e LIKE CONCAT( CONCAT('%',#{desc}),'%') or desc_c LIKE CONCAT( CONCAT('%',#{desc}),'%'))
+        </if>
+        limit #{offset},#{limit}
+    </select>
+
+    <select id="queryByCount" resultType="java.lang.Integer" statementType="PREPARED">
+        SELECT count(1)
+        FROM t_bas_sku
+        WHERE 1 = 1
+        <if test="customerId != null and customerId != ''">
+            and customer_id = #{customerId}
+        </if>
+        <if test="sku != null and sku != ''">
+            and sku = #{sku}
+        </if>
+        <if test="desc != null and desc != ''">
+            and (desc_e LIKE CONCAT( CONCAT('%',#{desc}),'%') or desc_c LIKE CONCAT( CONCAT('%',#{desc}),'%'))
+        </if>
+    </select>
+
+</mapper>
