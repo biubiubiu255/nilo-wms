@@ -12,6 +12,7 @@ import com.nilo.wms.dto.platform.Notify;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.util.HtmlUtils;
 
 /**
  * Created by admin on 2017/10/18.
@@ -64,14 +65,14 @@ public class NotifyDataBusConsumer extends AbstractMQConsumer {
             notifyDO.setNum(1);
             notifyDO.setNotifyId(notifyId);
             notifyDO.setParam(request.getParam().toString());
-            notifyDO.setResult(response);
+            notifyDO.setResult(HtmlUtils.htmlEscape(response));
             notifyDao.insert(notifyDO);
         } else {
             Notify update = new Notify();
             update.setNotifyId(notifyId);
             update.setStatus(success ? 1 : 0);
             update.setNum(query.getNum() + 1);
-            update.setResult(response);
+            update.setResult(HtmlUtils.htmlEscape(response));
             notifyDao.update(update);
         }
     }
