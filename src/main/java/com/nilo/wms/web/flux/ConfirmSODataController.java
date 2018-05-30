@@ -7,8 +7,10 @@ import com.nilo.wms.common.util.XmlUtil;
 import com.nilo.wms.dao.platform.ApiLogDao;
 import com.nilo.wms.dto.platform.ApiLog;
 import com.nilo.wms.service.OutboundService;
+import com.nilo.wms.service.platform.RedisUtil;
 import com.nilo.wms.web.BaseController;
 import com.nilo.wms.web.model.NotifyOrder;
+import com.nilo.wms.web.model.SubDelivery;
 import com.nilo.wms.web.model.WMSOrderNotify;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +70,7 @@ public class ConfirmSODataController extends BaseController {
             }
         } catch (Exception e) {
             addApiLog(data, "confirmSOData", e.getMessage(), false);
-            throw e;
+            return xmlFailedReturn(e.getMessage());
         }
         addApiLog(data, "confirmSOData", "SUCCESS", true);
 
@@ -98,6 +100,7 @@ public class ConfirmSODataController extends BaseController {
             outboundService.confirmSO(list, true);
         } catch (Exception e) {
             addApiLog(data, "confirmCGSOData", e.getMessage(), false);
+            return xmlFailedReturn(e.getMessage());
         }
         addApiLog(data, "confirmCGSOData", "SUCCESS", true);
         return xmlSuccessReturn();
@@ -114,5 +117,35 @@ public class ConfirmSODataController extends BaseController {
         log.setResponse(response);
         log.setStatus(result ? 1 : 0);
         apiLogDao.insert(log);
+    }
+
+    @RequestMapping(value = "/getDeliveryNo.html", method = {RequestMethod.POST})
+    @ResponseBody
+    public String getDeliveryNo() {
+        Long serialNum = RedisUtil.increment("old_waybill_num");
+        String waybillNum = "KE2" + String.format("%0" + 7 + "d", serialNum);
+        //获取运单号返回给OMS
+        return xmlSuccReturnDelivery(waybillNum);
+    }
+
+    @RequestMapping(value = "/getSubDelivery.html", method = {RequestMethod.POST})
+    @ResponseBody
+    public String getSubDelivery(String sign, String data) {
+        data = URLDecoder.decode(data);
+        //请求参数信息日志输出
+        logger.info("getSubDelivery.html sign:{},data{}", sign, data);
+        String deliveryNo = "";
+        try {
+            Principal principal = new Principal();
+            principal.setClientCode("kilimall");
+            SessionLocal.setPrincipal(principal);
+            data = data.substring(data.indexOf("<header>"), data.indexOf("</xmldata>"));
+            SubDelivery subDelivery = XmlUtil.XMLToBean(data, SubDelivery.class);
+            deliveryNo = outboundService.getSubWaybill(subDelivery.getRelationorderNo());
+        } catch (Exception e) {
+            logger.error("getSubDelivery failed. data:{}", data, e);
+            return xmlFailedReturn(e.getMessage());
+        }
+        return xmlSuccReturnDelivery(deliveryNo);
     }
 }

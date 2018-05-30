@@ -16,5 +16,7 @@ public interface OutboundService {
 
     void confirmSO(List<String> list, boolean result);
 
+    String getSubWaybill(String orderNo);
+
     FluxOutbound queryFlux(String orderNo);
 }

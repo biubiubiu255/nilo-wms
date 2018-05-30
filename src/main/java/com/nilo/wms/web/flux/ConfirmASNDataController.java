@@ -54,7 +54,7 @@ public class ConfirmASNDataController extends BaseController {
             inboundService.confirmASN(buildASNInfo(data));
         } catch (Exception e) {
             addApiLog(data, "confirmASNData", e.getMessage(), false);
-            throw e;
+            return xmlFailedReturn(e.getMessage());
         }
         addApiLog(data, "confirmASNData", "SUCCESS", true);
         return xmlSuccessReturn();
@@ -79,7 +79,7 @@ public class ConfirmASNDataController extends BaseController {
             inboundService.confirmASN(buildASNInfo(data));
         } catch (Exception e) {
             addApiLog(data, "confirmTRASNData", e.getMessage(), false);
-            throw e;
+            return xmlFailedReturn(e.getMessage());
         }
         addApiLog(data, "confirmTRASNData", "SUCCESS", true);
         return xmlSuccessReturn();

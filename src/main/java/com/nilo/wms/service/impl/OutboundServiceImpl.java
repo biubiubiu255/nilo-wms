@@ -29,8 +29,7 @@ import com.nilo.wms.service.HttpRequest;
 import com.nilo.wms.service.OutboundService;
 import com.nilo.wms.service.platform.RedisUtil;
 import com.nilo.wms.service.platform.SystemService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +38,8 @@ import redis.clients.jedis.Jedis;
 import javax.annotation.Resource;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -46,7 +47,6 @@ import java.util.*;
  */
 @Service
 public class OutboundServiceImpl implements OutboundService {
-    private static final Logger logger = LoggerFactory.getLogger(OutboundServiceImpl.class);
 
     @Resource(name = "fluxHttpRequest")
     private HttpRequest<FLuxRequest, FluxResponse> fluxHttpRequest;
@@ -236,6 +236,19 @@ public class OutboundServiceImpl implements OutboundService {
             waybillList.add(o.getWaybillNum());
         }
         notifyWeight(waybillList);
+    }
+
+    @Override
+    public String getSubWaybill(String orderNo) {
+
+        String clientCode = SessionLocal.getPrincipal().getClientCode();
+        Long serialNum = RedisUtil.increment("old_waybill_num");
+        String waybillNum = "KE2" + String.format("%0" + 7 + "d", serialNum);
+        Map<String, String> data = new HashMap<>();
+        data.put("sub_waybill_number", waybillNum);
+        data.put("waybill_number", orderNo);
+        systemService.notifyDataBus(JSON.toJSONString(data), clientCode, "get_sub_delivery_no");
+        return waybillNum;
     }
 
     private void notifyWeight(List<String> list) {

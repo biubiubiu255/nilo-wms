@@ -250,6 +250,18 @@ public class RedisUtil {
         }
     }
 
+    public static long increment(String key) {
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            return jedis.incr(key);
+        } finally {
+            if (null != jedis) {
+                jedis.close();
+            }
+        }
+    }
+
     public static Set<String> keys(String key) {
         Jedis jedis = null;
         try {

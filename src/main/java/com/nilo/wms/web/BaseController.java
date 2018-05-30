@@ -57,11 +57,15 @@ public class BaseController {
     protected String removeXmlDataElement(String value, String removeEle) {
         return value.replace("<" + removeEle + ">", "").replace("</" + removeEle + ">", "");
     }
-
+    protected String xmlFailedReturn(String data) {
+        return "<xmldata><Response><return><returnCode>0101</returnCode><returnDesc>" + data + "</returnDesc><returnFlag>0</returnFlag></return></Response></xmldata>";
+    }
     protected String xmlSuccessReturn() {
         return "<xmldata><Response><return><returnCode>0000</returnCode><returnDesc>ok</returnDesc><returnFlag>1</returnFlag></return></Response></xmldata>";
     }
-
+    protected String xmlSuccReturnDelivery(String deliveryNo) {
+        return "<xmldata><Response><return><deliveryNo>" + deliveryNo + "</deliveryNo><returnCode>0000</returnCode><returnDesc>ok</returnDesc><returnFlag>1</returnFlag></return></Response></xmldata>";
+    }
     protected Page getPage() {
         String _limit, _page;
         int offset = 0, limit = 10;
