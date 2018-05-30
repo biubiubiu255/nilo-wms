@@ -1,8 +1,6 @@
 package com.nilo.wms.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.nilo.mq.model.NotifyRequest;
-import com.nilo.mq.producer.AbstractMQProducer;
 import com.nilo.wms.common.Principal;
 import com.nilo.wms.common.SessionLocal;
 import com.nilo.wms.common.enums.InboundStatusEnum;
@@ -18,8 +16,6 @@ import com.nilo.wms.dao.flux.FluxInboundDao;
 import com.nilo.wms.dao.flux.SkuDao;
 import com.nilo.wms.dao.platform.InboundDao;
 import com.nilo.wms.dto.StorageInfo;
-import com.nilo.wms.dto.common.ClientConfig;
-import com.nilo.wms.dto.common.InterfaceConfig;
 import com.nilo.wms.dto.flux.FLuxRequest;
 import com.nilo.wms.dto.flux.FluxInbound;
 import com.nilo.wms.dto.flux.FluxInboundDetails;
@@ -32,20 +28,13 @@ import com.nilo.wms.dto.platform.parameter.StorageParam;
 import com.nilo.wms.service.BasicDataService;
 import com.nilo.wms.service.HttpRequest;
 import com.nilo.wms.service.InboundService;
-import com.nilo.wms.service.config.SystemConfig;
 import com.nilo.wms.service.platform.RedisUtil;
 import com.nilo.wms.service.platform.SystemService;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 
 import javax.annotation.Resource;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -108,11 +97,9 @@ public class InboundServiceImpl implements InboundService {
                 request.setMethod("putASNData");
                 break;
             }
+            case "HH":
             case "TH":
-            case "TR":
-            case "WX":
-            case "JS":
-            case "PY": {
+            case "JS": {
                 request.setMessageid("TRASN");
                 request.setMethod("putTRASNData");
                 break;

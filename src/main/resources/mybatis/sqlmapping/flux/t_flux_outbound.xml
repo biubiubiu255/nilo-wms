@@ -11,7 +11,7 @@
                 jdbcType="VARCHAR"/>
         <result property="status" column="sostatus" javaType="java.lang.Integer"
                 jdbcType="VARCHAR"/>
-        <result property="weight" column="grossweight" javaType="java.lang.Double"
+        <result property="weight" column="weight" javaType="java.lang.Double"
                 jdbcType="VARCHAR"/>
     </resultMap>
 
@@ -37,7 +37,7 @@
     </select>
 
     <select id="queryWeight" resultMap="weight">
-        select traceId,grossweight from DOC_Order_Packing_Summary
+        select traceId,nvl(grossweight,0) weight from DOC_Order_Packing_Summary
         where traceId in
         <foreach collection="list" item="t" index="index"
                  open="(" close=")" separator=",">

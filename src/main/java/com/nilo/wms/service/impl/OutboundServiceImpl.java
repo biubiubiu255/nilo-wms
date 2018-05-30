@@ -3,6 +3,7 @@ package com.nilo.wms.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.nilo.wms.common.Principal;
 import com.nilo.wms.common.SessionLocal;
+import com.nilo.wms.common.enums.InboundStatusEnum;
 import com.nilo.wms.common.enums.OutBoundStatusEnum;
 import com.nilo.wms.common.exception.BizErrorCode;
 import com.nilo.wms.common.exception.CheckErrorCode;
@@ -20,6 +21,7 @@ import com.nilo.wms.dto.flux.FLuxRequest;
 import com.nilo.wms.dto.flux.FluxOutbound;
 import com.nilo.wms.dto.flux.FluxResponse;
 import com.nilo.wms.dto.flux.FluxWeight;
+import com.nilo.wms.dto.inbound.Inbound;
 import com.nilo.wms.dto.outbound.OutboundHeader;
 import com.nilo.wms.dto.outbound.OutboundItem;
 import com.nilo.wms.dto.platform.outbound.Outbound;
@@ -219,6 +221,11 @@ public class OutboundServiceImpl implements OutboundService {
         }
 
         for (Outbound out : outList) {
+
+            if (out.getStatus().equals(OutBoundStatusEnum.closed.getCode())) {
+                continue;
+            }
+
             Map<String, Object> map = new HashMap<>();
             if (result) {
                 map.put("status", 240);
@@ -229,6 +236,10 @@ public class OutboundServiceImpl implements OutboundService {
             map.put("order_type", out.getOrderType());
             String data = JSON.toJSONString(map);
             systemService.notifyDataBus(data, clientCode, "wms_outbound_notify");
+
+            out.setStatus(OutBoundStatusEnum.closed.getCode());
+            outboundDao.update(out);
+
         }
         // 修改DMS重量
         List<String> waybillList = new ArrayList<>();
