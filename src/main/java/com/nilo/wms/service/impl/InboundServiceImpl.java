@@ -198,6 +198,7 @@ public class InboundServiceImpl implements InboundService {
             map.put("status", 99);
             map.put("client_ordersn", in.getReferenceNo());
             map.put("order_type", in.getAsnType());
+            map.put("order_items_list", in.getItemList());
             String data = JSON.toJSONString(map);
             systemService.notifyDataBus(data, clientCode, "wms_inbound_notify");
         }
