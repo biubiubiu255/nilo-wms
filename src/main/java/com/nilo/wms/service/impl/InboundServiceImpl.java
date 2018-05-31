@@ -208,6 +208,8 @@ public class InboundServiceImpl implements InboundService {
         param.setSku(skuList);
         param.setPage(1);
         param.setLimit(100);
+        param.setWarehouseId(SessionLocal.getPrincipal().getWarehouseId());
+        param.setCustomerId(SessionLocal.getPrincipal().getCustomerId());
         List<StorageInfo> storageList = skuDao.queryBy(param);
 
         //获取redis锁

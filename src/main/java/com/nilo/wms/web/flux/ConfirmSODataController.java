@@ -60,6 +60,8 @@ public class ConfirmSODataController extends BaseController {
         }
         Principal principal = new Principal();
         principal.setClientCode("kilimall");
+        principal.setWarehouseId("ke01");
+        principal.setCustomerId("KILIMALL");
         SessionLocal.setPrincipal(principal);
         try {
             if (successList.size() > 0) {
@@ -90,6 +92,8 @@ public class ConfirmSODataController extends BaseController {
         WMSOrderNotify notify = XmlUtil.XMLToBean(data, WMSOrderNotify.class);
         Principal principal = new Principal();
         principal.setClientCode("kilimall");
+        principal.setWarehouseId("ke01");
+        principal.setCustomerId("KILIMALL");
         SessionLocal.setPrincipal(principal);
         List<String> list = new ArrayList<String>();
 
