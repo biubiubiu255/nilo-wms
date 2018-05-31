@@ -172,6 +172,7 @@ public class InboundServiceImpl implements InboundService {
             if (inboundDO == null || inboundDO.getStatus() == InboundStatusEnum.closed.getCode()) {
                 iterator.remove();
             } else {
+                in.setAsnType(inboundDO.getAsnType());
                 in.setSupplierId(inboundDO.getSupplierId());
                 in.setSupplierName(inboundDO.getSupplierName());
             }
