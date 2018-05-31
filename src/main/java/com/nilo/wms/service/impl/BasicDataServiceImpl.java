@@ -27,7 +27,6 @@ import com.nilo.wms.service.HttpRequest;
 import com.nilo.wms.service.config.SystemConfig;
 import com.nilo.wms.service.platform.RedisUtil;
 import com.nilo.wms.service.platform.SystemService;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -447,11 +446,6 @@ public class BasicDataServiceImpl implements BasicDataService {
 
         //通知上游系统 库存变更
         storageChangeNotify(notifyList);
-    }
-
-    private String createNOSSign(String data, String key) {
-        String str = key + data + key;
-        return DigestUtils.md5Hex(str).toUpperCase();
     }
 
 }
