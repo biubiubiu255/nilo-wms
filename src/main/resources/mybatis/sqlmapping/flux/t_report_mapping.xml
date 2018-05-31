@@ -91,24 +91,24 @@
 	<!-- 查询（根据主键ID查询） -->
 	<select id="daily_dispatch" resultMap="staffWorkDO"
 		parameterType="map">
-		select d.editwho as user_id,
-		d.userdefine1 as logisticsType,
+		select
+		d.shipmentwho as user_id,
 		count(distinct d.orderno) as num
-		from doc_order_header d
-		where 1=1 and
-		d.sostatus='99' and d.userdefine1 in ('FBK','GS','DS' )
+		from
+		ACT_Allocation_Details d
+		where 1 = 1
 		<if test="start_date != null and start_date != '' ">
-			and to_char(d.edittime,'yyyy-mm-dd') >= #{start_date}
+			and to_char(d.shipmenttime,'yyyy-mm-dd') >= #{start_date}
 		</if>
 		<if test="end_date != null and end_date != '' ">
-			<![CDATA[ and to_char(d.edittime,'yyyy-mm-dd')  <= #{end_date}]]>
+			<![CDATA[ and to_char(d.shipmenttime,'yyyy-mm-dd')  <= #{end_date}]]>
 		</if>
 		<if test="username != null and username != '' ">
-			and editwho = #{username}
+			and shipmentwho = #{username}
 		</if>
 
-		group by d.editwho,d.userdefine1
-		order by d.editwho,d.userdefine1
+		group by d.shipmentwho
+		order by d.shipmentwho
 
 	</select>
 
