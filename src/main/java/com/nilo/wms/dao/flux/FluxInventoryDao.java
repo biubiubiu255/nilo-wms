@@ -11,7 +11,7 @@ import java.util.List;
  * Created by Administrator on 2017/4/24.
  */
 @Repository
-public interface SkuDao {
+public interface FluxInventoryDao {
 
     List<StorageInfo> queryBy(@Param("param") StorageParam param);
 

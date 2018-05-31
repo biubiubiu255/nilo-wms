@@ -8,7 +8,7 @@ import com.nilo.wms.common.exception.CheckErrorCode;
 import com.nilo.wms.common.util.AssertUtil;
 import com.nilo.wms.common.util.BeanUtils;
 import com.nilo.wms.common.util.StringUtil;
-import com.nilo.wms.dao.flux.SkuDao;
+import com.nilo.wms.dao.flux.FluxInventoryDao;
 import com.nilo.wms.dto.common.ResultMap;
 import com.nilo.wms.dto.platform.parameter.InventoryBalanceParam;
 import com.nilo.wms.dto.platform.parameter.StorageParam;
@@ -26,7 +26,7 @@ public class BalanceController extends BaseController {
     @Autowired
     private BasicDataService basicDataService;
     @Autowired
-    private SkuDao skuDao;
+    private FluxInventoryDao skuDao;
 
     @GetMapping
     @RequiresPermissions("20011")

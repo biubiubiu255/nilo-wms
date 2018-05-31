@@ -1,8 +1,6 @@
 package com.nilo.wms.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.nilo.mq.model.NotifyRequest;
-import com.nilo.mq.producer.AbstractMQProducer;
 import com.nilo.wms.common.Principal;
 import com.nilo.wms.common.SessionLocal;
 import com.nilo.wms.common.exception.BizErrorCode;
@@ -13,12 +11,11 @@ import com.nilo.wms.common.util.AssertUtil;
 import com.nilo.wms.common.util.DateUtil;
 import com.nilo.wms.common.util.StringUtil;
 import com.nilo.wms.common.util.XmlUtil;
-import com.nilo.wms.dao.flux.SkuDao;
+import com.nilo.wms.dao.flux.FluxInventoryDao;
 import com.nilo.wms.dto.SkuInfo;
 import com.nilo.wms.dto.StorageInfo;
 import com.nilo.wms.dto.SupplierInfo;
 import com.nilo.wms.dto.common.ClientConfig;
-import com.nilo.wms.dto.common.InterfaceConfig;
 import com.nilo.wms.dto.common.PageResult;
 import com.nilo.wms.dto.flux.FLuxRequest;
 import com.nilo.wms.dto.flux.FluxResponse;
@@ -34,13 +31,10 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 
 import javax.annotation.Resource;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -53,7 +47,7 @@ public class BasicDataServiceImpl implements BasicDataService {
     @Resource(name = "fluxHttpRequest")
     private HttpRequest<FLuxRequest, FluxResponse> fluxHttpRequest;
     @Autowired
-    private SkuDao skuDao;
+    private FluxInventoryDao fluxInventoryDao;
     @Autowired
     private SystemService systemService;
 
@@ -133,10 +127,10 @@ public class BasicDataServiceImpl implements BasicDataService {
 
         PageResult<StorageInfo> pageResult = new PageResult<>();
 
-        Integer count = skuDao.queryCountBy(param);
+        Integer count = fluxInventoryDao.queryCountBy(param);
         pageResult.setCount(count);
         if (count > 0) {
-            List<StorageInfo> list = skuDao.queryBy(param);
+            List<StorageInfo> list = fluxInventoryDao.queryBy(param);
             for (StorageInfo s : list) {
                 String key = RedisUtil.getSkuKey(principal.getClientCode(), s.getSku());
                 String lockSto = RedisUtil.hget(key, RedisUtil.LOCK_STORAGE);
@@ -338,7 +332,7 @@ public class BasicDataServiceImpl implements BasicDataService {
         param.setCustomerId(config.getCustomerCode());
         param.setPage(1);
         param.setLimit(10000);
-        List<StorageInfo> list = skuDao.queryBy(param);
+        List<StorageInfo> list = fluxInventoryDao.queryBy(param);
         if (list == null || list.size() == 0) return;
         Set<String> cacheSkuList = RedisUtil.keys(RedisUtil.getSkuKey(clientCode, "*"));
 
@@ -413,7 +407,7 @@ public class BasicDataServiceImpl implements BasicDataService {
         }
 
         if (safeStorage != null) {
-            skuDao.updateSafeQty(principal.getCustomerId(), sku, safeStorage.toString());
+            fluxInventoryDao.updateSafeQty(principal.getCustomerId(), sku, safeStorage.toString());
         }
     }
 

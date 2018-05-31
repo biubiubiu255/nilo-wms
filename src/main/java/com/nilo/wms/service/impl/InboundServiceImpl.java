@@ -13,7 +13,7 @@ import com.nilo.wms.common.util.DateUtil;
 import com.nilo.wms.common.util.StringUtil;
 import com.nilo.wms.common.util.XmlUtil;
 import com.nilo.wms.dao.flux.FluxInboundDao;
-import com.nilo.wms.dao.flux.SkuDao;
+import com.nilo.wms.dao.flux.FluxInventoryDao;
 import com.nilo.wms.dao.platform.InboundDao;
 import com.nilo.wms.dto.StorageInfo;
 import com.nilo.wms.dto.flux.FLuxRequest;
@@ -49,7 +49,7 @@ public class InboundServiceImpl implements InboundService {
     @Autowired
     private InboundDao inboundDao;
     @Autowired
-    private SkuDao skuDao;
+    private FluxInventoryDao skuDao;
     @Autowired
     private BasicDataService basicDataService;
     @Autowired

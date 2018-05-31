@@ -7,7 +7,7 @@ package com.nilo.wms.service.scheduler;
 import com.nilo.wms.common.exception.BizErrorCode;
 import com.nilo.wms.common.exception.WMSException;
 import com.nilo.wms.dao.flux.FluxOutboundDao;
-import com.nilo.wms.dao.flux.SkuDao;
+import com.nilo.wms.dao.flux.FluxInventoryDao;
 import com.nilo.wms.dto.common.ClientConfig;
 import com.nilo.wms.dto.flux.FluxOutboundDetails;
 import com.nilo.wms.service.config.SystemConfig;
@@ -37,7 +37,7 @@ public class SafeStockSchedule {
     @Autowired
     private FluxOutboundDao fluxOutboundDao;
     @Autowired
-    private SkuDao skuDao;
+    private FluxInventoryDao skuDao;
 
     public void execute() {
         try {
