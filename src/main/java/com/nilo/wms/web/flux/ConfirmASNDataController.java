@@ -49,7 +49,7 @@ public class ConfirmASNDataController extends BaseController {
 
         Principal principal = new Principal();
         principal.setClientCode("kilimall");
-        principal.setWarehouseId("ke01");
+        principal.setWarehouseId("KE01");
         principal.setCustomerId("KILIMALL");
         SessionLocal.setPrincipal(principal);
         try {
@@ -75,7 +75,7 @@ public class ConfirmASNDataController extends BaseController {
 
         Principal principal = new Principal();
         principal.setClientCode("kilimall");
-        principal.setWarehouseId("ke01");
+        principal.setWarehouseId("KE01");
         principal.setCustomerId("KILIMALL");
         SessionLocal.setPrincipal(principal);
 
