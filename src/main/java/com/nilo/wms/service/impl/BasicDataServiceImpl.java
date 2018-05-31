@@ -64,7 +64,7 @@ public class BasicDataServiceImpl implements BasicDataService {
             AssertUtil.isNotBlank(s.getFreightClass(), CheckErrorCode.CLASS_EMPTY);
 
             if (StringUtil.isNotBlank(s.getLogisticsType())) {
-                if (!(StringUtil.equals("1", s.getLogisticsType()) || StringUtil.equals("3", s.getLogisticsType()) || StringUtil.equals("2", s.getLogisticsType()))) {
+                if (!(StringUtil.equals("1", s.getLogisticsType()) || StringUtil.equals("0", s.getLogisticsType()) || StringUtil.equals("2", s.getLogisticsType()))) {
                     throw new WMSException(CheckErrorCode.LOGISTICS_TYPE_ERROR);
                 }
             }
