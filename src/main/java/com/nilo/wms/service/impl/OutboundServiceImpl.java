@@ -225,7 +225,6 @@ public class OutboundServiceImpl implements OutboundService {
             if (out.getStatus().equals(OutBoundStatusEnum.closed.getCode())) {
                 continue;
             }
-
             Map<String, Object> map = new HashMap<>();
             if (result) {
                 map.put("status", 240);
@@ -241,12 +240,15 @@ public class OutboundServiceImpl implements OutboundService {
             outboundDao.update(out);
 
         }
-        // 修改DMS重量
+
         List<String> waybillList = new ArrayList<>();
         for (Outbound o : outList) {
             waybillList.add(o.getWaybillNum());
         }
+        // 修改DMS重量
         notifyWeight(waybillList);
+        // DMS 自动到件
+        arriveScan(waybillList);
     }
 
     @Override
@@ -267,6 +269,12 @@ public class OutboundServiceImpl implements OutboundService {
         List<FluxWeight> weightList = fluxOutboundDao.queryWeight(list);
         String updateData = JSON.toJSONString(weightList);
         systemService.notifyDataBus(updateData, clientCode, "update_weight");
+    }
+
+    private void arriveScan(List<String> list) {
+        String clientCode = SessionLocal.getPrincipal().getClientCode();
+        String updateData = JSON.toJSONString(list);
+        systemService.notifyDataBus(updateData, clientCode, "arrive_scan");
     }
 
     @Override
