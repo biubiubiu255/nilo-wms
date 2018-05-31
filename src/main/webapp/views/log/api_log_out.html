@@ -8,6 +8,7 @@
         <select id="searchKey">
             <option value="" i18n="please_select"></option>
             <option value="notifyId" i18n="log_api_out_notify_id"></option>
+            <option value="method" i18n="log_api_method"></option>
             <option value="url" i18n="config_interface_url"></option>
             <option value="param" i18n="log_api_data"></option>
             <option value="result" i18n="log_api_response"></option>
@@ -58,6 +59,7 @@
             cols: [[
                 {type: 'numbers'},
                 {field: 'notifyId', sort: true, title: getI18nAttr('log_api_out_notify_id')},
+                {field: 'method', sort: true, title: getI18nAttr('log_api_method')},
                 {field: 'url', sort: true, title: getI18nAttr('config_interface_url')},
                 {field: 'param', sort: true, title: getI18nAttr('log_api_data')},
                 {field: 'result', sort: true, title: getI18nAttr('log_api_response')},

@@ -153,6 +153,7 @@ public class SystemServiceImpl implements SystemService {
 
         NotifyRequest notify = new NotifyRequest();
         notify.setParam(params);
+        notify.setMethod(method);
         notify.setUrl(interfaceConfig.getUrl());
         try {
             notifyDataBusProducer.sendMessage(notify);

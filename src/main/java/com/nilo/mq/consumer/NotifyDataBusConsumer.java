@@ -63,6 +63,7 @@ public class NotifyDataBusConsumer extends AbstractMQConsumer {
             notifyDO.setUrl(request.getUrl());
             notifyDO.setStatus(success ? 1 : 0);
             notifyDO.setNum(1);
+            notifyDO.setMethod(request.getMethod());
             notifyDO.setNotifyId(notifyId);
             notifyDO.setParam(request.getParam().toString());
             notifyDO.setResult(HtmlUtils.htmlEscape(response));

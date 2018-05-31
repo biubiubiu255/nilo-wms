@@ -11,9 +11,18 @@ public class NotifyParam extends Page {
     private String url;
     private String param;
     private String result;
+    private String method;
     private Long start_date;
 
     private Long end_date;
+
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
 
     public Long getStart_date() {
         return start_date;

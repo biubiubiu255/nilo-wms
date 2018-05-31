@@ -16,6 +16,8 @@
                 jdbcType="VARCHAR"/>
         <result property="result" column="result" javaType="java.lang.String"
                 jdbcType="VARCHAR"/>
+        <result property="method" column="method" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
         <result property="status" column="status" javaType="java.lang.Integer"
                 jdbcType="INTEGER"/>
         <result property="num" column="num" javaType="java.lang.Integer"
@@ -29,7 +31,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id ,notify_id,url,param,result,num,status,created_time , updated_time ,version
+        id ,notify_id,url,param,method,result,num,status,created_time , updated_time ,version
     </sql>
 
     <!-- 插入语句 -->
@@ -37,9 +39,9 @@
             useGeneratedKeys="true"
             keyProperty="id">
         INSERT INTO t_sys_notify
-        ( notify_id,url,param,result,num,status,created_time , updated_time ,version)
+        ( notify_id,url,param,method,result,num,status,created_time , updated_time ,version)
         VALUES
-        (#{notifyId},#{url},#{param},#{result},#{num},#{status} ,UNIX_TIMESTAMP(NOW()),UNIX_TIMESTAMP(NOW()),UUID())
+        (#{notifyId},#{url},#{param},#{method},#{result},#{num},#{status} ,UNIX_TIMESTAMP(NOW()),UNIX_TIMESTAMP(NOW()),UUID())
     </insert>
     <!-- 动态更新语句 -->
     <update id="update" parameterType="com.nilo.wms.dto.platform.Notify" statementType="PREPARED">
@@ -65,6 +67,9 @@
         <if test="notifyId != null">
             and notify_id = #{notifyId}
         </if>
+        <if test="method != null">
+            and method = #{method}
+        </if>
         <if test="url != null">
             and url = #{url}
         </if>
@@ -84,6 +89,9 @@
         FROM t_sys_notify where 1 = 1
         <if test="notifyId != null">
             and notify_id = #{notifyId}
+        </if>
+        <if test="method != null">
+            and method = #{method}
         </if>
         <if test="url != null">
             and url = #{url}

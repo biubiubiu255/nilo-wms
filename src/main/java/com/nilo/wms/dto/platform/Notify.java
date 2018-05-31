@@ -8,6 +8,7 @@ import com.nilo.wms.common.BaseDo;
  */
 public class Notify extends BaseDo<Long> {
 
+    private String method;
 
     private String notifyId;
 
@@ -20,6 +21,14 @@ public class Notify extends BaseDo<Long> {
     private Integer status;
 
     private Integer num;
+
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
 
     public String getNotifyId() {
         return notifyId;
