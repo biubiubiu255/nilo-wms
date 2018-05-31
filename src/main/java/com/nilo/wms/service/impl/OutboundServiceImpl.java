@@ -222,13 +222,15 @@ public class OutboundServiceImpl implements OutboundService {
 
         for (Outbound out : outList) {
 
-            if (out.getStatus().equals(OutBoundStatusEnum.closed.getCode())) {
+            if (out.getStatus() == OutBoundStatusEnum.closed.getCode() || out.getStatus() == OutBoundStatusEnum.closed.getCode()) {
                 continue;
             }
             Map<String, Object> map = new HashMap<>();
             if (result) {
+                out.setStatus(OutBoundStatusEnum.closed.getCode());
                 map.put("status", 240);
             } else {
+                out.setStatus(OutBoundStatusEnum.cancelled.getCode());
                 map.put("status", 0);
             }
             map.put("client_ordersn", out.getReferenceNo());
@@ -236,7 +238,6 @@ public class OutboundServiceImpl implements OutboundService {
             String data = JSON.toJSONString(map);
             systemService.notifyDataBus(data, clientCode, "wms_outbound_notify");
 
-            out.setStatus(OutBoundStatusEnum.closed.getCode());
             outboundDao.update(out);
 
         }
