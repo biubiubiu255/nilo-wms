@@ -387,13 +387,12 @@ public class BasicDataServiceImpl implements BasicDataService {
     @Override
     public void storageChangeNotify(List<StorageInfo> list) {
 
+        if (list == null || list.size() == 0) return;
         for (StorageInfo s : list) {
             if (s.getLockStorage() > s.getStorage()) {
                 s.setLockStorage(s.getStorage());
             }
         }
-
-        if (list == null || list.size() == 0) return;
         String clientCode = SessionLocal.getPrincipal().getClientCode();
         Map<String, Object> map = new HashMap<>();
         map.put("sku_list", list);
