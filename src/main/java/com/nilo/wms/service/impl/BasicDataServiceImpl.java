@@ -185,6 +185,11 @@ public class BasicDataServiceImpl implements BasicDataService {
             int stoInt = sto == null ? 0 : Integer.parseInt(sto);
             //校验库存是否足够
             if (sto == null || lockStoInt + qty > stoInt) {
+
+                if (lockStoInt > stoInt) {
+                    lockStoInt = stoInt;
+                }
+
                 StorageInfo s = new StorageInfo();
                 s.setSku(sku);
                 s.setStorage(stoInt);
@@ -331,7 +336,7 @@ public class BasicDataServiceImpl implements BasicDataService {
         param.setWarehouseId(config.getWarehouseCode());
         param.setCustomerId(config.getCustomerCode());
         param.setPage(1);
-        param.setLimit(10000);
+        param.setLimit(20000);
         List<StorageInfo> list = fluxInventoryDao.queryBy(param);
         if (list == null || list.size() == 0) return;
         Set<String> cacheSkuList = RedisUtil.keys(RedisUtil.getSkuKey(clientCode, "*"));
@@ -383,12 +388,18 @@ public class BasicDataServiceImpl implements BasicDataService {
     @Override
     public void storageChangeNotify(List<StorageInfo> list) {
 
+        for (StorageInfo s : list) {
+            if (s.getLockStorage() > s.getStorage()) {
+                s.setLockStorage(s.getStorage());
+            }
+        }
+
         if (list == null || list.size() == 0) return;
         String clientCode = SessionLocal.getPrincipal().getClientCode();
         Map<String, Object> map = new HashMap<>();
         map.put("sku_list", list);
         String data = JSON.toJSONString(map);
-        systemService.notifyDataBus(data,clientCode,"update_storage");
+        systemService.notifyDataBus(data, clientCode, "update_storage");
 
     }
 
