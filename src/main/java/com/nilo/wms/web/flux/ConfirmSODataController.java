@@ -38,15 +38,13 @@ public class ConfirmSODataController extends BaseController {
     @ResponseBody
     public String confirmSOData(String data) {
         data = URLDecoder.decode(data);
-        if (logger.isDebugEnabled()) {
-            logger.debug("Request confirmSOData.html -data:{}", data);
-        }
+
         data = removeXmlDataElement(data, "xmldata");
         //根据wms推送的订单状态进去区分，Udf07（90）：取消； Udf07（99）已完成
         WMSOrderNotify notify = XmlUtil.XMLToBean(data, WMSOrderNotify.class);
 
-        List<String> successList = new ArrayList<String>();
-        List<String> cancelList = new ArrayList<String>();
+        List<String> successList = new ArrayList<>();
+        List<String> cancelList = new ArrayList<>();
 
         for (NotifyOrder order : notify.getList()) {
             //订单状态
@@ -84,9 +82,7 @@ public class ConfirmSODataController extends BaseController {
     public String confirmCGSOData(String data) {
 
         data = URLDecoder.decode(data);
-        if (logger.isDebugEnabled()) {
-            logger.debug("Request confirmCGSOData.html -data:{}", data);
-        }
+
         data = removeXmlDataElement(data, "xmldata");
         //根据wms推送的订单状态进去区分，Udf07（90）：取消； Udf07（99）已完成
         WMSOrderNotify notify = XmlUtil.XMLToBean(data, WMSOrderNotify.class);

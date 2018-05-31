@@ -220,9 +220,11 @@ public class OutboundServiceImpl implements OutboundService {
             throw new WMSException(BizErrorCode.OUTBOUND_NOT_EXIST);
         }
 
+        List<String> waybillList = new ArrayList<>();
+
         for (Outbound out : outList) {
 
-            if (out.getStatus() == OutBoundStatusEnum.closed.getCode() || out.getStatus() == OutBoundStatusEnum.closed.getCode()) {
+            if (out.getStatus() == OutBoundStatusEnum.closed.getCode() || out.getStatus() == OutBoundStatusEnum.cancelled.getCode()) {
                 continue;
             }
             Map<String, Object> map = new HashMap<>();
@@ -240,16 +242,16 @@ public class OutboundServiceImpl implements OutboundService {
 
             outboundDao.update(out);
 
+            waybillList.add(out.getWaybillNum());
+
         }
 
-        List<String> waybillList = new ArrayList<>();
-        for (Outbound o : outList) {
-            waybillList.add(o.getWaybillNum());
+        if (!waybillList.isEmpty()) {
+            // 修改DMS重量
+            notifyWeight(waybillList);
+            // DMS 自动到件
+            arriveScan(waybillList);
         }
-        // 修改DMS重量
-        notifyWeight(waybillList);
-        // DMS 自动到件
-        arriveScan(waybillList);
     }
 
     @Override

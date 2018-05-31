@@ -42,9 +42,7 @@ public class ConfirmASNDataController extends BaseController {
     @ResponseBody
     public String confirmASNData(String data) {
         data = URLDecoder.decode(data);
-        if (logger.isDebugEnabled()) {
-            logger.debug("Request confirmASNData.html -data:{}", data);
-        }
+
         data = removeXmlDataElement(data, "xmldata");
 
         Principal principal = new Principal();
@@ -68,9 +66,7 @@ public class ConfirmASNDataController extends BaseController {
     public String confirmTRASNData(String data) {
 
         data = URLDecoder.decode(data);
-        if (logger.isDebugEnabled()) {
-            logger.debug("Request confirmTRASNData.html -data:{}", data);
-        }
+
         data = removeXmlDataElement(data, "xmldata");
 
         Principal principal = new Principal();
