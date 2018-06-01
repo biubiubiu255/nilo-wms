@@ -17,7 +17,6 @@
                 <ref bean="storageTrigger"/>
                 <ref bean="emailTrigger"/>
                 <ref bean="safeStorageTrigger"/>
-                <ref bean="inboundReviewsTrigger"/>
             </list>
         </property>
         <property name="autoStartup" value="true"/>
