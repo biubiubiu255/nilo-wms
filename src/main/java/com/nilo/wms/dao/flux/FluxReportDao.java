@@ -21,6 +21,8 @@ public interface FluxReportDao {
 
     List<StaffWork> daily_dispatch(Map<String, String> param);
 
-    List<InventoryLocation> queryByShelf(String shelf);
+    List<InventoryLocation> inventory_location(Map<String, String> param);
+
+    Integer inventory_location_count(Map<String, String> param);
 
 }

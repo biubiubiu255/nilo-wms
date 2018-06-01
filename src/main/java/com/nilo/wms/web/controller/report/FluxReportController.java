@@ -6,6 +6,7 @@ import com.nilo.wms.common.util.ExportExcel;
 import com.nilo.wms.common.util.IdWorker;
 import com.nilo.wms.common.util.StringUtil;
 import com.nilo.wms.dao.flux.FluxReportDao;
+import com.nilo.wms.dto.common.Page;
 import com.nilo.wms.dto.common.ResultMap;
 import com.nilo.wms.dto.flux.InventoryLocation;
 import com.nilo.wms.dto.flux.StaffWork;
@@ -83,23 +84,36 @@ public class FluxReportController extends BaseController {
     @RequiresPermissions("3004")
     @GetMapping("/inventory_location")
     @ResponseBody
-    public String inventory_location(String shelf) {
+    public String inventory_location(String searchKey, String searchValue) {
 
         List<InventoryLocation> list = new ArrayList<>();
-        if (StringUtil.isNotBlank(shelf)) {
-            list = fluxReportDao.queryByShelf(shelf);
+        if (StringUtil.isEmpty(searchKey)) {
+            return toLayUIData(0, list);
         }
-        return toLayUIData(list.size(), list);
+        Map<String, String> param = new HashMap<>();
+        param.put(searchKey, searchValue);
+        Page page = getPage();
+        param.put("offset", "" + page.getOffset());
+        param.put("end", "" + page.getOffset() + page.getLimit());
+        Integer count = fluxReportDao.inventory_location_count(param);
+        list = fluxReportDao.inventory_location(param);
+        return toLayUIData(count, list);
     }
 
     @RequiresPermissions("3004")
-    @PostMapping("/inventory_location/build_excel/{shelf}")
+    @PostMapping("/inventory_location/build_excel")
     @ResponseBody
-    public String build_excel(@PathVariable("shelf") String shelf) {
+    public String build_excel(String searchKey, String searchValue) {
 
         List<InventoryLocation> list = new ArrayList<>();
-        if (StringUtil.isNotBlank(shelf)) {
-            list = fluxReportDao.queryByShelf(shelf);
+
+        Map<String, String> param = new HashMap<>();
+        param.put(searchKey, searchValue);
+        Integer count = fluxReportDao.inventory_location_count(param);
+        if (count != 0) {
+            param.put("offset", "" + 0);
+            param.put("end", "" + count);
+            list = fluxReportDao.inventory_location(param);
         }
 
         HSSFWorkbook wb = new HSSFWorkbook();
@@ -128,7 +142,7 @@ public class FluxReportController extends BaseController {
         // 设置response参数，可以打开下载页面
         response.reset();
         response.setContentType("application/vnd.ms-excel;charset=utf-8");
-        response.setHeader("Content-Disposition", "attachment;filename="+fileName+".xls");
+        response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xls");
         ServletOutputStream out = null;
         BufferedInputStream bis = null;
         BufferedOutputStream bos = null;

@@ -5,34 +5,14 @@
 	</span>
     <div class="layui-form toolbar">
 
-        <div class="layui-inline">
-            <label class="layui-form-label"><span i18n="location_shelf"></span>：</label>
-            <div class="layui-input-inline">
-                <select id="shelf">
-                    <option value="" i18n="please_select"></option>
-                    <option value="01">1</option>
-                    <option value="02">2</option>
-                    <option value="03">3</option>
-                    <option value="04">4</option>
-                    <option value="05">5</option>
-                    <option value="06">6</option>
-                    <option value="07">7</option>
-                    <option value="08">8</option>
-                    <option value="09">9</option>
-                    <option value="10">10</option>
-                    <option value="11">11</option>
-                    <option value="12">12</option>
-                    <option value="13">13</option>
-                    <option value="14">14</option>
-                    <option value="15">15</option>
-                    <option value="16">16</option>
-                    <option value="17">17</option>
-                    <option value="18">18</option>
-                    <option value="19">19</option>
-                    <option value=20">20</option>
-                </select>
-            </div>
-        </div>
+        <span i18n="search"></span>：
+        <select id="searchKey">
+            <option value="" i18n="please_select"></option>
+            <option value="shelf" i18n="location_shelf"></option>
+            <option value="location" i18n="location"></option>
+        </select>
+
+        <input id="searchValue" class="layui-input search-input" type="text"/>&emsp;
 
         <button id="searchBtn" class="layui-btn search-btn" permission="10011"><i class="layui-icon">&#xe615;</i><span
                 i18n="search"/></button>
@@ -80,18 +60,18 @@
         $("#searchBtn").click(function () {
             doSearch(table);
         });
-
         function doSearch(table) {
-            var shelf = $("#shelf").val();
-            if(!shelf){
-                layer.msg("Pls select shelf.", {icon: 2});
-                return;
+            var key = $("#searchKey").val();
+            var value = $("#searchValue").val();
+            if (value == '') {
+                key = '';
             }
             layer.load(2);
             layui.table.reload('table', {
                 where: {
-                    shelf: shelf
-                }
+                searchKey: key,
+                searchValue: value
+            }
             });
         }
 
@@ -100,17 +80,22 @@
         });
 
         function exportLocation(table) {
-            var shelf = $("#shelf").val();
-            if(!shelf){
-                layer.msg("Pls select shelf.", {icon: 2});
-                return;
+            var key = $("#searchKey").val();
+            var value = $("#searchValue").val();
+            if (value == '') {
+                key = '';
             }
-            layer.confirm("Confirm Shelf："+shelf, function (index) {
+            if(!key){
+                layer.msg("pls input");
+            }
+            layer.confirm("Confirm Export", function (index) {
                 layer.close(index);
                 layer.load(2);
 
-                $.post("/servlet/report/inventory_location/build_excel/" + shelf, {
-                    token: getToken()
+                $.post("/servlet/report/inventory_location/build_excel", {
+                    token: getToken(),
+                    searchKey: key,
+                    searchValue: value
                 }, function (data) {
                     layer.closeAll('loading');
                     if (data.status == 'succ') {
