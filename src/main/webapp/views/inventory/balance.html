@@ -71,13 +71,19 @@
         </div>
     </form>
 </script>
+
+<!-- 表单弹窗 -->
+<script type="text/html" id="detailModel">
+    <table class="layui-table" id="lockTable" lay-filter="lockTable"></table>
+</script>
 <!-- 表格操作列 -->
 <script type="text/html" id="barTpl">
     <button class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit" permission="20012"><span
         i18n="edit"></span></button>
     <button class="layui-btn layui-btn-normal layui-btn-xs" lay-event="sync" permission="20013"><span
         i18n="inventory_sync"></span></button>
-
+    <button class="layui-btn layui-btn-normal layui-btn-xs" lay-event="detail" permission="20015"><span
+            i18n="detail"></span></button>
 </script>
 
 

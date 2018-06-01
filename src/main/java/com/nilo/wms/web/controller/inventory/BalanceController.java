@@ -13,29 +13,30 @@ import com.nilo.wms.dto.common.ResultMap;
 import com.nilo.wms.dto.platform.parameter.InventoryBalanceParam;
 import com.nilo.wms.dto.platform.parameter.StorageParam;
 import com.nilo.wms.service.BasicDataService;
+import com.nilo.wms.service.platform.RedisUtil;
 import com.nilo.wms.web.BaseController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("/inventory/balance")
 public class BalanceController extends BaseController {
     @Autowired
     private BasicDataService basicDataService;
-    @Autowired
-    private FluxInventoryDao skuDao;
 
     @GetMapping
     @RequiresPermissions("20011")
     public String list(String searchValue, String searchKey) {
 
-        InventoryBalanceParam parameter = new InventoryBalanceParam();
-        if (StringUtil.isNotBlank(searchKey)) {
-            BeanUtils.setProperty(parameter, searchKey, searchValue);
+        List<String> skuList = new ArrayList<>();
+        if (StringUtil.isEmpty(searchKey)) {
+            return toLayUIData(0, skuList);
         }
+
+        InventoryBalanceParam parameter = new InventoryBalanceParam();
+        BeanUtils.setProperty(parameter, searchKey, searchValue);
         parameter.setPageInfo(getPage());
 
         Principal principal = SessionLocal.getPrincipal();
@@ -45,7 +46,7 @@ public class BalanceController extends BaseController {
         param.setLimit(parameter.getLimit());
         param.setOffset(parameter.getOffset());
         param.setPage(parameter.getOffset() / parameter.getLimit() + 1);
-        List<String> skuList = new ArrayList<>();
+
         if (StringUtil.isNotEmpty(parameter.getSku())) {
             String[] str = parameter.getSku().split(",");
             for (String s : str) {
@@ -89,4 +90,59 @@ public class BalanceController extends BaseController {
         return ResultMap.success().toJson();
     }
 
+    @GetMapping("/{sku}")
+    @RequiresPermissions("20015")
+    public String detail(@PathVariable("sku") String sku) {
+
+        List<LockOrder> list = new ArrayList<>();
+        if (StringUtil.isEmpty(sku)) {
+            return toLayUIData(0, list);
+        }
+        String clientCode = SessionLocal.getPrincipal().getClientCode();
+
+        Set<String> lockList = RedisUtil.keys(RedisUtil.getLockOrderKey(clientCode, "*"));
+        for (String l : lockList) {
+            String qty = RedisUtil.hget(l, sku);
+            if (StringUtil.isNotBlank(qty)) {
+                LockOrder lockOrder = new LockOrder();
+                lockOrder.setOrderNo(l);
+                lockOrder.setQty(Integer.parseInt(qty));
+                lockOrder.setCreatedTime(RedisUtil.hget(l, RedisUtil.LOCK_TIME));
+                list.add(lockOrder);
+            }
+        }
+        return toLayUIData(lockList.size(),list);
+
+    }
+
+    private static class LockOrder {
+
+        private String orderNo;
+        private Integer qty;
+        private String createdTime;
+
+        public String getOrderNo() {
+            return orderNo;
+        }
+
+        public void setOrderNo(String orderNo) {
+            this.orderNo = orderNo;
+        }
+
+        public Integer getQty() {
+            return qty;
+        }
+
+        public void setQty(Integer qty) {
+            this.qty = qty;
+        }
+
+        public String getCreatedTime() {
+            return createdTime;
+        }
+
+        public void setCreatedTime(String createdTime) {
+            this.createdTime = createdTime;
+        }
+    }
 }

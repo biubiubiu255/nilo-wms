@@ -57,6 +57,9 @@ $(function () {
         if (layEvent === 'sync') { //同步
             syncInventory(data);
         }
+        if (layEvent === 'detail') { //锁定明细
+            showLockModel(data);
+        }
     });
 
     function syncInventory(obj) {
@@ -90,6 +93,39 @@ $(function () {
         syncAll();
     });
 });
+
+function showLockModel(data) {
+    layer.open({
+        type: 1,
+        title: getI18nAttr('edit'),
+        area: ['800px','600px'],
+        offset: '120px',
+        content: $("#detailModel").html(),
+        success: function (layero, index) {
+            refreshI18n(layero);
+            layer.load(2);
+            layui.table.render({
+                elem: '#lockTable',
+                url: '/servlet/inventory/balance/' + data.sku,
+                where: {
+                    token: getToken()
+                },
+                page: true,
+                cols: [[
+                    {type: 'numbers'},
+                    {field: 'orderNo', sort: true, title: getI18nAttr('order_no')},
+                    {field: 'qty', sort: true,width: 120, title: getI18nAttr('qty')},
+                    {field: 'createdTime', sort: true,width: 180, title: getI18nAttr('create_time')}
+
+                ]],
+                done: function (res, curr, count) {
+                    layer.closeAll('loading');
+                    refreshI18n();
+                }
+            });
+        }
+    });
+}
 
 //显示表单弹窗
 function showEditModel(data) {
