@@ -64,7 +64,7 @@
 		group by d.pickedwho
 		order by count(sku) desc
 	</select>
-
+ 
 
 	<!-- 查询（根据主键ID查询） -->
 	<select id="daily_verify" resultMap="staffWorkDO"
