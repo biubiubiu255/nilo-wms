@@ -161,6 +161,7 @@ public class SystemServiceImpl implements SystemService {
             logger.error("notifyDataBus send message failed.", e);
         }
     }
+
     private String createNOSSign(String data, String key) {
         String str = key + data + key;
         return DigestUtils.md5Hex(str).toUpperCase();

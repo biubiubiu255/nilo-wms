@@ -21,7 +21,11 @@
     </resultMap>
 
     <select id="queryStorage" resultMap="orderHandlerDO">
-        select sku,qty,udf1 storeId,udf2 categories from idx_v_inv where customerId=#{customerId} and warehouseId=#{warehouseId}
+
+        select * from (select sku,qty,udf1 storeId,udf2 categories from idx_v_inv where customerId=#{customerId} and warehouseId=#{warehouseId})
+        where <![CDATA[  rownum<2000  ]]>
+
+
     </select>
 
     <select id="queryInBoundOrderHandler" resultMap="orderHandlerDO">

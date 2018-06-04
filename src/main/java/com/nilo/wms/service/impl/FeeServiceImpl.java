@@ -48,14 +48,14 @@ public class FeeServiceImpl implements FeeService {
 
         for (FeeDO d : list) {
             Fee f = new Fee();
-            f.setSeller_id(d.getStoreId());
+            f.setStore_id(d.getStoreId());
             f.setFactor1(d.getCategories());
 
-            f.setFactor2(getFactor2(clientCode, "inventory", d));
+            f.setFactor2(getFactor2(clientCode, "storage", d));
             f.setClass_id(d.getCategories());
             f.setQty(d.getQty());
             f.setSku(d.getSku());
-            f.setReceivable_money(getMoney(clientCode, "inventory", d.getCategories(), d.getQty(), false));
+            f.setReceivable_money(getMoney(clientCode, "storage", d.getCategories(), d.getQty(), false));
             resultList.add(f);
         }
 
@@ -75,8 +75,8 @@ public class FeeServiceImpl implements FeeService {
             f.setOrder_sn(o.getOrderNo());
             f.setOrder_no(o.getNo());
             f.setClass_id(o.getCategories());
-            f.setSeller_id(o.getStoreId());
-            f.setSeller_name(o.getStoreDesc());
+            f.setStore_id(o.getStoreId());
+            f.setStore_name(o.getStoreDesc());
             f.setFactor1(o.getCategories());
             f.setSku(o.getSku());
             f.setQty(o.getQty());
@@ -107,8 +107,8 @@ public class FeeServiceImpl implements FeeService {
             Fee f = new Fee();
             f.setOrder_sn(o.getOrderNo());
             f.setOrder_no(o.getNo());
-            f.setSeller_id(o.getStoreId());
-            f.setSeller_name(o.getStoreDesc());
+            f.setStore_id(o.getStoreId());
+            f.setStore_name(o.getStoreDesc());
             f.setFactor1(o.getCategories());
             f.setSku(o.getSku());
             f.setQty(o.getQty());
@@ -143,8 +143,8 @@ public class FeeServiceImpl implements FeeService {
             Fee f = new Fee();
             f.setOrder_sn(o.getOrderNo());
             f.setOrder_no(o.getNo());
-            f.setSeller_id(o.getStoreId());
-            f.setSeller_name(o.getStoreDesc());
+            f.setStore_id(o.getStoreId());
+            f.setStore_name(o.getStoreDesc());
             f.setFactor1(o.getCategories());
             f.setSku(o.getSku());
             f.setQty(o.getQty());
@@ -177,8 +177,8 @@ public class FeeServiceImpl implements FeeService {
             Fee f = new Fee();
             f.setOrder_sn(o.getOrderNo());
             f.setOrder_no(o.getNo());
-            f.setSeller_id(o.getStoreId());
-            f.setSeller_name(o.getStoreDesc());
+            f.setStore_id(o.getStoreId());
+            f.setStore_name(o.getStoreDesc());
             f.setFactor1(o.getCategories());
             f.setQty(o.getQty());
             f.setSku(o.getSku());
@@ -215,6 +215,8 @@ public class FeeServiceImpl implements FeeService {
         map.put("list", list);
         map.put("date", date);
         map.put("type_id", "1");
+        map.put("order_platform", clientCode);
+        map.put("store_id", list.get(0).getStore_id());
         map.put("charge_type", "1");
         map.put("money_type", moneyType);
         String data = JSON.toJSONString(map);

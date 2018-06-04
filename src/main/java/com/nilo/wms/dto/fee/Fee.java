@@ -5,7 +5,6 @@ package com.nilo.wms.dto.fee;
  */
 public class Fee {
 
-    private String order_platform = "kilimall_kenya";
 
     private String charge_type;
 
@@ -21,21 +20,15 @@ public class Fee {
 
     private String factor5;
 
-    private String factor6;
-
-    private String factor7;
-
-    private String factor8;
-
     private String rate;
 
     private String order_no;
 
     private String order_sn;
 
-    private String seller_id;
+    private String store_id;
 
-    private String seller_name;
+    private String store_name;
 
     private double receivable_money;
 
@@ -66,14 +59,6 @@ public class Fee {
     private String sku;
 
     private int qty;
-
-    public String getOrder_platform() {
-        return order_platform;
-    }
-
-    public void setOrder_platform(String order_platform) {
-        this.order_platform = order_platform;
-    }
 
     public String getCharge_type() {
         return charge_type;
@@ -131,30 +116,6 @@ public class Fee {
         this.factor5 = factor5;
     }
 
-    public String getFactor6() {
-        return factor6;
-    }
-
-    public void setFactor6(String factor6) {
-        this.factor6 = factor6;
-    }
-
-    public String getFactor7() {
-        return factor7;
-    }
-
-    public void setFactor7(String factor7) {
-        this.factor7 = factor7;
-    }
-
-    public String getFactor8() {
-        return factor8;
-    }
-
-    public void setFactor8(String factor8) {
-        this.factor8 = factor8;
-    }
-
     public String getRate() {
         return rate;
     }
@@ -179,20 +140,20 @@ public class Fee {
         this.order_sn = order_sn;
     }
 
-    public String getSeller_id() {
-        return seller_id;
+    public String getStore_id() {
+        return store_id;
     }
 
-    public void setSeller_id(String seller_id) {
-        this.seller_id = seller_id;
+    public void setStore_id(String store_id) {
+        this.store_id = store_id;
     }
 
-    public String getSeller_name() {
-        return seller_name;
+    public String getStore_name() {
+        return store_name;
     }
 
-    public void setSeller_name(String seller_name) {
-        this.seller_name = seller_name;
+    public void setStore_name(String store_name) {
+        this.store_name = store_name;
     }
 
     public double getReceivable_money() {
