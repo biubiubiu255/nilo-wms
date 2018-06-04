@@ -7,10 +7,7 @@ import com.nilo.wms.common.exception.BizErrorCode;
 import com.nilo.wms.common.exception.CheckErrorCode;
 import com.nilo.wms.common.exception.SysErrorCode;
 import com.nilo.wms.common.exception.WMSException;
-import com.nilo.wms.common.util.AssertUtil;
-import com.nilo.wms.common.util.DateUtil;
-import com.nilo.wms.common.util.StringUtil;
-import com.nilo.wms.common.util.XmlUtil;
+import com.nilo.wms.common.util.*;
 import com.nilo.wms.dao.flux.FluxInventoryDao;
 import com.nilo.wms.dto.SkuInfo;
 import com.nilo.wms.dto.StorageInfo;
@@ -338,20 +335,22 @@ public class BasicDataServiceImpl implements BasicDataService {
         param.setLimit(20000);
         List<StorageInfo> list = fluxInventoryDao.queryBy(param);
         if (list == null || list.size() == 0) return;
-        Set<String> cacheSkuList = RedisUtil.keys(RedisUtil.getSkuKey(clientCode, "*"));
+
+
+        Set<String> cacheSkuKeyList = RedisUtil.keys(RedisUtil.getSkuKey(clientCode, "*"));
 
         //获取redis锁
         Jedis jedis = RedisUtil.getResource();
         String requestId = UUID.randomUUID().toString();
         RedisUtil.tryGetDistributedLock(jedis, RedisUtil.LOCK_KEY, requestId);
 
-        //构建差异数据
+        //构建wms-cache差异数据
         List<StorageInfo> diffList = new ArrayList<>();
         for (StorageInfo s : list) {
             String key = RedisUtil.getSkuKey(clientCode, s.getSku());
-            String storage = RedisUtil.hget(key, RedisUtil.STORAGE);
+            String storage = jedis.hget(key, RedisUtil.STORAGE);
             if (!StringUtil.equals(storage, "" + s.getStorage())) {
-                String lockStorage = RedisUtil.hget(key, RedisUtil.LOCK_STORAGE);
+                String lockStorage = jedis.hget(key, RedisUtil.LOCK_STORAGE);
                 s.setLockStorage(lockStorage == null ? 0 : Integer.parseInt(lockStorage));
                 diffList.add(s);
                 continue;
@@ -363,25 +362,39 @@ public class BasicDataServiceImpl implements BasicDataService {
         for (StorageInfo s : list) {
             wmsSkuList.put(s.getSku(), s);
         }
-        for (String s : cacheSkuList) {
-            String[] temp = s.split("_sku_");
+        for (String key : cacheSkuKeyList) {
+            String[] temp = key.split("_sku_");
             if (!wmsSkuList.containsKey(temp[1])) {
-                String key = RedisUtil.getSkuKey(clientCode, temp[1]);
                 jedis.del(key);
             }
         }
 
         for (StorageInfo s : diffList) {
             String key = RedisUtil.getSkuKey(clientCode, s.getSku());
-            RedisUtil.hset(key, RedisUtil.STORAGE, "" + s.getStorage());
-            RedisUtil.hset(key, RedisUtil.LOCK_STORAGE, "" + s.getLockStorage());
-            RedisUtil.hset(key, RedisUtil.STORE, s.getStoreId());
-            RedisUtil.hset(key, RedisUtil.SAFE_STORAGE, "" + s.getSafeStorage());
+            jedis.hset(key, RedisUtil.STORAGE, "" + s.getStorage());
+            jedis.hset(key, RedisUtil.LOCK_STORAGE, "" + s.getLockStorage());
+            jedis.hset(key, RedisUtil.STORE, s.getStoreId());
+            jedis.hset(key, RedisUtil.SAFE_STORAGE, "" + s.getSafeStorage());
         }
 
         RedisUtil.releaseDistributedLock(jedis, RedisUtil.LOCK_KEY, requestId);
-        //通知上游系统 库存变更
-        storageChangeNotify(diffList);
+
+        //同步所有sku库存
+        cacheSkuKeyList = RedisUtil.keys(RedisUtil.getSkuKey(clientCode, "*"));
+
+        List<StorageInfo> notifyList = new ArrayList<>();
+        for(String key : cacheSkuKeyList){
+            StorageInfo s = new StorageInfo();
+            String[] temp = key.split("_sku_");
+            s.setSku(temp[1]);
+            s.setStorage(Integer.parseInt(jedis.hget(key, RedisUtil.STORAGE)));
+            String lockStorage = jedis.hget(key, RedisUtil.LOCK_STORAGE);
+            s.setLockStorage(lockStorage == null ? 0 : Integer.parseInt(lockStorage));
+            notifyList.add(s);
+        }
+        for(List<StorageInfo> l : ListUtil.averageAssign(notifyList,1000)){
+            storageChangeNotify(l);
+        }
     }
 
     @Override
