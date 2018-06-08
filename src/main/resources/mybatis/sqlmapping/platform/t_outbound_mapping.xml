@@ -67,4 +67,34 @@
             #{item}
         </foreach>
     </select>
+
+
+    <select id="queryBy" resultMap="OutboundDO" statementType="PREPARED">
+        SELECT i.*
+        FROM t_outbound i left join t_outbound_detail d on i.reference_no = d.reference_no where i.client_code=#{clientCode}
+        <if test="sku != null and sku != ''">
+            and d.sku = #{sku}
+        </if>
+        <if test="referenceNo != null and referenceNo != ''">
+            and i.reference_no = #{referenceNo}
+        </if>
+
+        <![CDATA[ and  i.created_time >= #{start_date} and i.created_time <= #{end_date} ]]>
+        order by i.created_time desc
+        limit #{offset},#{limit}
+
+    </select>
+
+    <select id="queryCountBy" statementType="PREPARED" resultType="java.lang.Long">
+        SELECT count(i.reference_no)
+        FROM t_outbound i left join t_outbound_detail d on i.reference_no = d.reference_no where i.client_code=#{clientCode}
+        <if test="sku != null and sku != ''">
+            and d.sku = #{sku}
+        </if>
+        <if test="referenceNo != null and referenceNo != ''">
+            and i.reference_no = #{referenceNo}
+        </if>
+        <![CDATA[ and  i.created_time >= #{start_date} and i.created_time <= #{end_date} ]]>
+
+    </select>
 </mapper>

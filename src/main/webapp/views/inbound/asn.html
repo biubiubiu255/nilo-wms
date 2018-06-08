@@ -1,0 +1,86 @@
+
+
+<div class="content-header">
+	<span class="layui-breadcrumb">
+	  <a href="#!home"><span i18n="home_page"></span></a>
+	  <a><cite><span i18n="asn"></span> </cite></a>
+	</span>
+    <div class="layui-form toolbar">
+        <span i18n="search"></span>：
+        <select id="searchKey">
+            <option value="" i18n="please_select"></option>
+            <option value="referenceNo" i18n="ReferenceNo"></option>
+            <option value="sku" i18n="basic_sku"></option>
+        </select>
+
+        <input id="searchValue" class="layui-input search-input" type="text"/>&emsp;
+        <div class="layui-inline">
+            <label class="layui-form-label"><span i18n="date_range"></span></label>
+            <div class="layui-input-inline">
+                <input type="text" class="layui-input" id="date_range" placeholder=" - ">
+            </div>
+        </div>
+        <button id="searchBtn" class="layui-btn search-btn" permission="70011"><i class="layui-icon">&#xe615;</i><span i18n="search"/></button>
+    </div>
+
+</div>
+<table class="layui-table" id="table" lay-filter="table"></table>
+
+<!-- 表单弹窗 -->
+<script type="text/html" id="addModel">
+    <form id="editForm" class="layui-form model-form" action="">
+        <input name="userId" type="hidden"/>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span i18n="system_user_username"></span></label>
+            <div class="layui-input-block">
+                <input name="username" type="text" class="layui-input" maxlength="20" lay-verify="required" required/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span i18n="system_user_nickname"></span></label>
+            <div class="layui-input-block">
+                <input name="nickname" type="text" class="layui-input" maxlength="20" lay-verify="required" required/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span i18n="system_user_phone"></span></label>
+            <div class="layui-input-block">
+                <input name="phone" type="text" class="layui-input" lay-verify="required" required/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span i18n="sex"></span></label>
+            <div class="layui-input-block">
+                <input type="radio" name="sex" id="sexMan" value="M" title='<spring:message code="male"/>' checked/>
+                <input type="radio" name="sex" id="sexWoman" value="F" title='<spring:message code="female"/>'/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span i18n="system_role"></span></label>
+            <div class="layui-input-block">
+                <select id="role-select" name="roleId" lay-verify="required">
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span i18n="basic_warehouse_name"></span></label>
+            <div class="layui-input-block">
+                <select id="warehouse-select" name="warehouseCode" lay-verify="required">
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item model-form-footer">
+            <button class="layui-btn layui-btn-primary" type="button" id="btnCancel"><span i18n="cancel"></span></button>
+            <button class="layui-btn" lay-filter="btnSubmit" lay-submit><span i18n="ok"></span></button>
+        </div>
+    </form>
+</script>
+<!-- 表格操作列 -->
+<div id="barTpl" style="display:none;">
+
+    <button class="layui-btn layui-btn-xs" lay-event="asn_put_away" permission="70012"><span i18n="asn_put_away"></span></button>
+
+</div>
+
+
+<script type="text/javascript" src="/static/js/inbound/asn.js"></script>

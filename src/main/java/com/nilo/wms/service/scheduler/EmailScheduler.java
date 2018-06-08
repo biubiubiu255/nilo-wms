@@ -26,7 +26,6 @@ public class EmailScheduler {
         try {
             List<Notify> failedList = notifyDao.queryFailed();
             if (failedList == null || failedList.size() == 0) return;
-
             //发送邮件
             sendFailedEmail(failedList);
 

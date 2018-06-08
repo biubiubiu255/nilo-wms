@@ -3,7 +3,6 @@ package com.nilo.wms.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.nilo.wms.common.Principal;
 import com.nilo.wms.common.SessionLocal;
-import com.nilo.wms.common.enums.InboundStatusEnum;
 import com.nilo.wms.common.enums.OutBoundStatusEnum;
 import com.nilo.wms.common.exception.BizErrorCode;
 import com.nilo.wms.common.exception.CheckErrorCode;
@@ -17,22 +16,24 @@ import com.nilo.wms.dao.flux.FluxOutboundDao;
 import com.nilo.wms.dao.platform.OutboundDao;
 import com.nilo.wms.dao.platform.OutboundItemDao;
 import com.nilo.wms.dto.StorageInfo;
+import com.nilo.wms.dto.common.PageResult;
 import com.nilo.wms.dto.flux.FLuxRequest;
 import com.nilo.wms.dto.flux.FluxOutbound;
 import com.nilo.wms.dto.flux.FluxResponse;
 import com.nilo.wms.dto.flux.FluxWeight;
-import com.nilo.wms.dto.inbound.Inbound;
 import com.nilo.wms.dto.outbound.OutboundHeader;
 import com.nilo.wms.dto.outbound.OutboundItem;
+import com.nilo.wms.dto.platform.inbound.Inbound;
 import com.nilo.wms.dto.platform.outbound.Outbound;
 import com.nilo.wms.dto.platform.outbound.OutboundDetail;
+import com.nilo.wms.dto.platform.parameter.OutboundParam;
 import com.nilo.wms.service.BasicDataService;
 import com.nilo.wms.service.HttpRequest;
 import com.nilo.wms.service.OutboundService;
 import com.nilo.wms.service.platform.RedisUtil;
 import com.nilo.wms.service.platform.SystemService;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import redis.clients.jedis.Jedis;
@@ -40,8 +41,6 @@ import redis.clients.jedis.Jedis;
 import javax.annotation.Resource;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -62,6 +61,8 @@ public class OutboundServiceImpl implements OutboundService {
     private FluxOutboundDao fluxOutboundDao;
     @Autowired
     private BasicDataService basicDataService;
+    @Value("#{configProperties['flux_status']}")
+    private String flux_status;
 
     @Override
     public void createOutBound(OutboundHeader outBound) {
@@ -231,6 +232,7 @@ public class OutboundServiceImpl implements OutboundService {
             if (result) {
                 out.setStatus(OutBoundStatusEnum.closed.getCode());
                 map.put("status", 240);
+                waybillList.add(out.getWaybillNum());
             } else {
                 out.setStatus(OutBoundStatusEnum.cancelled.getCode());
                 map.put("status", 0);
@@ -239,11 +241,7 @@ public class OutboundServiceImpl implements OutboundService {
             map.put("order_type", out.getOrderType());
             String data = JSON.toJSONString(map);
             systemService.notifyDataBus(data, clientCode, "wms_outbound_notify");
-
             outboundDao.update(out);
-
-            waybillList.add(out.getWaybillNum());
-
         }
 
         if (!waybillList.isEmpty()) {
@@ -269,9 +267,22 @@ public class OutboundServiceImpl implements OutboundService {
 
     private void notifyWeight(List<String> list) {
         String clientCode = SessionLocal.getPrincipal().getClientCode();
-        List<FluxWeight> weightList = fluxOutboundDao.queryWeight(list);
-        String updateData = JSON.toJSONString(weightList);
-        systemService.notifyDataBus(updateData, clientCode, "update_weight");
+
+        if (StringUtil.equals(flux_status, "close")) {
+            List<FluxWeight> weightList = new ArrayList<>();
+            for (String s : list) {
+                FluxWeight weight = new FluxWeight();
+                weight.setWeight(12.2d);
+                weight.setWaybillNum(s);
+                weightList.add(weight);
+            }
+            String updateData = JSON.toJSONString(weightList);
+            systemService.notifyDataBus(updateData, clientCode, "update_weight");
+        } else {
+            List<FluxWeight> weightList = fluxOutboundDao.queryWeight(list);
+            String updateData = JSON.toJSONString(weightList);
+            systemService.notifyDataBus(updateData, clientCode, "update_weight");
+        }
     }
 
     private void arriveScan(List<String> list) {
@@ -287,11 +298,79 @@ public class OutboundServiceImpl implements OutboundService {
 
         Principal principal = SessionLocal.getPrincipal();
 
-        FluxOutbound order = fluxOutboundDao.queryByReferenceNo(principal.getCustomerId(), orderNo);
-        if (order == null) throw new WMSException(BizErrorCode.CLIENT_ORDER_SN_NOT_EXIST);
-        order.setStatusDesc(OutBoundStatusEnum.getEnum(order.getStatus()).getDesc_e());
-        return order;
+        if (StringUtil.equals(flux_status, "close")) {
+
+            Outbound outbound = outboundDao.queryByReferenceNo(principal.getClientCode(),orderNo);
+            if (outbound == null) throw new WMSException(BizErrorCode.CLIENT_ORDER_SN_NOT_EXIST);
+            FluxOutbound order = new FluxOutbound();
+            order.setStatus(outbound.getStatus());
+            order.setReferenceNo(orderNo);
+            order.setWmsOrderNo("Ronny");
+            order.setStatusDesc(OutBoundStatusEnum.getEnum(outbound.getStatus()).getDesc_e());
+            return order;
+        } else {
+            FluxOutbound order = fluxOutboundDao.queryByReferenceNo(principal.getCustomerId(), orderNo);
+            if (order == null) throw new WMSException(BizErrorCode.CLIENT_ORDER_SN_NOT_EXIST);
+            order.setStatusDesc(OutBoundStatusEnum.getEnum(order.getStatus()).getDesc_e());
+            return order;
+        }
     }
+
+    @Override
+    public void ship(String referenceNo) {
+
+        String clientCode = SessionLocal.getPrincipal().getClientCode();
+        Outbound out = outboundDao.queryByReferenceNo(clientCode, referenceNo);
+
+        Map<String, Object> map = new HashMap<>();
+        out.setStatus(OutBoundStatusEnum.closed.getCode());
+        map.put("status", 240);
+        map.put("client_ordersn", out.getReferenceNo());
+        map.put("order_type", out.getOrderType());
+        String data = JSON.toJSONString(map);
+        systemService.notifyDataBus(data, clientCode, "wms_outbound_notify");
+
+        out.setStatus(OutBoundStatusEnum.closed.getCode());
+        outboundDao.update(out);
+
+        // DMS 自动到件
+        List<String> list = new ArrayList<>();
+        list.add(out.getWaybillNum());
+        arriveScan(list);
+
+        // 修改DMS重量
+        notifyWeight(list);
+    }
+
+    @Override
+    public void cancel(String referenceNo) {
+        String clientCode = SessionLocal.getPrincipal().getClientCode();
+        Outbound out = outboundDao.queryByReferenceNo(clientCode, referenceNo);
+
+        Map<String, Object> map = new HashMap<>();
+        out.setStatus(OutBoundStatusEnum.closed.getCode());
+        map.put("status", 0);
+        map.put("client_ordersn", out.getReferenceNo());
+        map.put("order_type", out.getOrderType());
+        String data = JSON.toJSONString(map);
+        systemService.notifyDataBus(data, clientCode, "wms_outbound_notify");
+
+        out.setStatus(OutBoundStatusEnum.cancelled.getCode());
+        outboundDao.update(out);
+    }
+
+    @Override
+    public PageResult<Outbound> queryBy(OutboundParam param) {
+        Long count = outboundDao.queryCountBy(param);
+        PageResult<Outbound> pageResult = new PageResult<>();
+        if (count == 0) {
+            return pageResult;
+        }
+        List<Outbound> list = outboundDao.queryBy(param);
+        pageResult.setData(list);
+        return pageResult;
+    }
+
 
     @XmlRootElement(name = "ordernos")
     private static class OutBoundSimpleBean {

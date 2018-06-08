@@ -1,0 +1,38 @@
+
+
+<div class="content-header">
+	<span class="layui-breadcrumb">
+	  <a href="#!home"><span i18n="home_page"></span></a>
+	  <a><cite><span i18n="shipment_order"></span> </cite></a>
+	</span>
+    <div class="layui-form toolbar">
+        <span i18n="search"></span>：
+        <select id="searchKey">
+            <option value="" i18n="please_select"></option>
+            <option value="referenceNo" i18n="ReferenceNo"></option>
+            <option value="sku" i18n="basic_sku"></option>
+        </select>
+
+        <input id="searchValue" class="layui-input search-input" type="text"/>&emsp;
+        <div class="layui-inline">
+            <label class="layui-form-label"><span i18n="date_range"></span></label>
+            <div class="layui-input-inline">
+                <input type="text" class="layui-input" id="date_range" placeholder=" - ">
+            </div>
+        </div>
+        <button id="searchBtn" class="layui-btn search-btn" permission="60011"><i class="layui-icon">&#xe615;</i><span i18n="search"/></button>
+    </div>
+
+</div>
+<table class="layui-table" id="table" lay-filter="table"></table>
+
+<!-- 表格操作列 -->
+<div id="barTpl" style="display:none;">
+
+    <button class="layui-btn layui-btn-xs" lay-event="ship" permission="60012"><span i18n="shipment_order_ship"></span></button>
+
+    <button class="layui-btn  layui-btn-xs layui-btn-danger" lay-event="cancel" permission="60013"><span i18n="shipment_order_cancel"></span></button>
+
+</div>
+
+<script type="text/javascript" src="/static/js/outbound/shipment_order.js"></script>

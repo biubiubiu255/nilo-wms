@@ -4,7 +4,7 @@
 <mapper namespace="com.nilo.wms.dao.platform.InboundDao">
 
     <!-- 实体bean与数据字段对应关系 -->
-    <resultMap id="inboundMap" type="com.nilo.wms.dto.inbound.Inbound">
+    <resultMap id="inboundMap" type="com.nilo.wms.dto.platform.inbound.Inbound">
         <result property="id" column="id" javaType="java.lang.Long"
                 jdbcType="INTEGER"/>
         <result property="clientCode" column="client_code" javaType="java.lang.String"
@@ -36,7 +36,7 @@
     </sql>
 
     <!-- 插入语句 -->
-    <insert id="insert" parameterType="com.nilo.wms.dto.inbound.Inbound" statementType="PREPARED"
+    <insert id="insert" parameterType="com.nilo.wms.dto.platform.inbound.Inbound" statementType="PREPARED"
             useGeneratedKeys="true"
             keyProperty="id">
         INSERT INTO t_inbound
@@ -45,7 +45,7 @@
         (#{clientCode},#{customerCode},#{warehouseCode}, #{referenceNo},#{referenceNo2},#{asnType},#{supplierId},#{supplierName},#{status} ,UNIX_TIMESTAMP(NOW()),UNIX_TIMESTAMP(NOW()),UUID())
     </insert>
     <!-- 动态更新语句 -->
-    <update id="update" parameterType="com.nilo.wms.dto.inbound.Inbound" statementType="PREPARED">
+    <update id="update" parameterType="com.nilo.wms.dto.platform.inbound.Inbound" statementType="PREPARED">
         update t_inbound
         <trim prefix="set" suffixOverrides="," suffix="where client_code=#{clientCode} and reference_no=#{referenceNo}">
             <if test="status != null">
@@ -59,6 +59,35 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM t_inbound where client_code=#{clientCode} and reference_no=#{referenceNo}
+    </select>
+
+
+    <select id="queryBy" resultMap="inboundMap" statementType="PREPARED">
+        SELECT i.*
+        FROM t_inbound i left join t_inbound_detail d on i.reference_no = d.reference_no where i.client_code=#{clientCode}
+        <if test="sku != null and sku != ''">
+            and d.sku = #{sku}
+        </if>
+        <if test="referenceNo != null and referenceNo != ''">
+            and i.reference_no = #{referenceNo}
+        </if>
+        <![CDATA[ and  i.created_time >= #{start_date} and i.created_time <= #{end_date} ]]>
+        order by i.created_time desc
+        limit #{offset},#{limit}
+
+    </select>
+
+    <select id="queryCountBy" statementType="PREPARED" resultType="java.lang.Long">
+        SELECT count(i.reference_no)
+        FROM t_inbound i left join t_inbound_detail d on i.reference_no = d.reference_no where i.client_code=#{clientCode}
+        <if test="sku != null and sku != ''">
+            and d.sku = #{sku}
+        </if>
+        <if test="referenceNo != null and referenceNo != ''">
+            and i.reference_no = #{referenceNo}
+        </if>
+        <![CDATA[ and  i.created_time >= #{start_date} and i.created_time <= #{end_date} ]]>
+
     </select>
     
 </mapper>

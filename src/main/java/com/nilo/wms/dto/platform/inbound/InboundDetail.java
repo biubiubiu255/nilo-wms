@@ -1,5 +1,6 @@
-package com.nilo.wms.dto.inbound;
+package com.nilo.wms.dto.platform.inbound;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.nilo.wms.common.BaseDo;
 
 
@@ -9,6 +10,7 @@ public class InboundDetail extends BaseDo<Long> {
     private String  clientCode;
     private String  referenceNo;
     private String  sku;
+    @JSONField(name = "goods_num")
     private Integer qty;
     private Integer receiveQty;
     private Integer receiveTime;

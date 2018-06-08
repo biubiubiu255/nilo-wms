@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nilo.wms.dao.platform.SkuDao">
+
+    <!-- 实体bean与数据字段对应关系 -->
+    <resultMap id="sku" type="com.nilo.wms.dto.platform.Sku">
+        <result property="id" column="id" javaType="java.lang.Integer"
+                jdbcType="INTEGER"/>
+        <result property="customerCode" column="customer_code" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="sku" column="sku" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="desc_c" column="desc_c" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="desc_e" column="desc_e" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+
+        <result property="status" column="status" javaType="java.lang.Integer"
+                jdbcType="INTEGER"/>
+        <result property="storeId" column="store_id" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="storeName" column="store_name" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+
+        <result property="freightClass" column="freight_class" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="price" column="price" javaType="java.lang.Double"
+                jdbcType="DECIMAL"/>
+        <result property="logisticType" column="logistic_type" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="image" column="image" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="createdTime" column="created_time" javaType="java.lang.Long"
+                jdbcType="INTEGER"/>
+        <result property="updatedTime" column="updated_time" javaType="java.lang.Long"
+                jdbcType="INTEGER"/>
+        <result property="createdBy" column="created_by" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="updatedBy" column="updated_by" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,customer_code,sku,desc_c,desc_e,status,logistic_type,price,image,freight_class,store_id,store_name,
+        created_by,created_time,updated_by,updated_time
+    </sql>
+
+    <!-- 插入语句 -->
+    <insert id="insert" parameterType="com.nilo.wms.dto.platform.Sku" statementType="PREPARED"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO t_bas_sku
+        (customer_code,sku,desc_c,desc_e,status,logistic_type,price,image,freight_class,store_id,store_name,
+        created_by,created_time,updated_by,updated_time)
+        VALUES
+        (#{customerCode}, #{sku}, #{desc_c},#{desc_e},#{status},#{logisticType},#{price},#{image},#{freightClass},#{storeId},#{storeName},#{createdBy},UNIX_TIMESTAMP(NOW()),#{updatedBy}, UNIX_TIMESTAMP(NOW()))
+    </insert>
+
+    <!-- 动态更新语句 -->
+    <update id="update" parameterType="com.nilo.wms.dto.platform.Sku" statementType="PREPARED">
+        update t_bas_sku
+        <trim prefix="set" suffixOverrides="," suffix="where sku=#{sku}">
+            <if test="desc_c != null and desc_c != ''">
+                desc_c = #{desc_c},
+            </if>
+            <if test="desc_e != null and desc_e != ''">
+                desc_e = #{desc_e},
+            </if>
+            <if test="status != null ">
+                status = #{status},
+            </if>
+            <if test="storeName != null and storeName != ''">
+                store_name = #{storeName},
+            </if>
+            <if test="storeId != null and storeId != ''">
+                store_id = #{storeId},
+            </if>
+            <if test="freightClass != null and freightClass != ''">
+                freight_class = #{freightClass},
+            </if>
+            <if test="price != null and price != ''">
+                price = #{price},
+            </if>
+        </trim>
+    </update>
+
+    <delete id="deleteBySku">
+        delete from t_bas_sku where sku = #{sku}
+    </delete>
+
+    <select id="queryBySku" resultMap="sku" statementType="PREPARED">
+        SELECT
+        *
+        FROM t_bas_sku
+        WHERE sku = #{sku}
+    </select>
+
+    <select id="queryBy" resultMap="sku" statementType="PREPARED">
+        SELECT
+        *
+        FROM t_bas_sku
+        WHERE 1 = 1
+        <if test="customerCode != null and customerCode != ''">
+            and customer_code = #{customerCode}
+        </if>
+        <if test="sku != null and sku != ''">
+            and sku = #{sku}
+        </if>
+        <if test="desc != null and desc != ''">
+            and (desc_e LIKE CONCAT( CONCAT('%',#{desc}),'%') or desc_c LIKE CONCAT( CONCAT('%',#{desc}),'%'))
+        </if>
+        limit #{offset},#{limit}
+    </select>
+
+    <select id="queryByCount" resultType="java.lang.Integer" statementType="PREPARED">
+        SELECT count(1)
+        FROM t_bas_sku
+        WHERE 1 = 1
+        <if test="customerCode != null and customerCode != ''">
+            and customer_code = #{customerCode}
+        </if>
+        <if test="sku != null and sku != ''">
+            and sku = #{sku}
+        </if>
+        <if test="desc != null and desc != ''">
+            and (desc_e LIKE CONCAT( CONCAT('%',#{desc}),'%') or desc_c LIKE CONCAT( CONCAT('%',#{desc}),'%'))
+        </if>
+    </select>
+
+</mapper>

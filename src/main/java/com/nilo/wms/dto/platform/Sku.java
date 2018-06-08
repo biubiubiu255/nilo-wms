@@ -5,7 +5,7 @@ import com.nilo.wms.dto.common.InterfaceConfig;
 
 public class Sku extends BaseDo<Integer> {
 
-    private String customerId;
+    private String customerCode;
 
     private String sku;
 
@@ -13,15 +13,7 @@ public class Sku extends BaseDo<Integer> {
 
     private String desc_e;
 
-    private Integer length;
-
-    private Integer width;
-
-    private Integer height;
-
-    private Integer price;
-
-    private Integer weight;
+    private Double price;
 
     private String freightClass;
 
@@ -29,38 +21,18 @@ public class Sku extends BaseDo<Integer> {
 
     private Integer status;
 
-    private Integer cube;
+    private String logisticType;
 
-    public Integer getCube() {
-        return cube;
+    private String storeId;
+
+    private String storeName;
+
+    public String getCustomerCode() {
+        return customerCode;
     }
 
-    public void setCube(Integer cube) {
-        this.cube = cube;
-    }
-
-    public String getFreightClass() {
-        return freightClass;
-    }
-
-    public void setFreightClass(String freightClass) {
-        this.freightClass = freightClass;
-    }
-
-    public Integer getWeight() {
-        return weight;
-    }
-
-    public void setWeight(Integer weight) {
-        this.weight = weight;
-    }
-
-    public String getCustomerId() {
-        return customerId;
-    }
-
-    public void setCustomerId(String customerId) {
-        this.customerId = customerId;
+    public void setCustomerCode(String customerCode) {
+        this.customerCode = customerCode;
     }
 
     public String getSku() {
@@ -87,44 +59,20 @@ public class Sku extends BaseDo<Integer> {
         this.desc_e = desc_e;
     }
 
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public Integer getLength() {
-        return length;
-    }
-
-    public void setLength(Integer length) {
-        this.length = length;
-    }
-
-    public Integer getWidth() {
-        return width;
-    }
-
-    public void setWidth(Integer width) {
-        this.width = width;
-    }
-
-    public Integer getHeight() {
-        return height;
-    }
-
-    public void setHeight(Integer height) {
-        this.height = height;
-    }
-
-    public Integer getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(Integer price) {
+    public void setPrice(Double price) {
         this.price = price;
+    }
+
+    public String getFreightClass() {
+        return freightClass;
+    }
+
+    public void setFreightClass(String freightClass) {
+        this.freightClass = freightClass;
     }
 
     public String getImage() {
@@ -135,23 +83,35 @@ public class Sku extends BaseDo<Integer> {
         this.image = image;
     }
 
+    public Integer getStatus() {
+        return status;
+    }
 
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
 
-    @Override
-    public String toString() {
-        return "Sku{" +
-                "customerId='" + customerId + '\'' +
-                ", sku='" + sku + '\'' +
-                ", desc_c='" + desc_c + '\'' +
-                ", desc_e='" + desc_e + '\'' +
-                ", status=" + status +
-                ", length=" + length +
-                ", width=" + width +
-                ", height=" + height +
-                ", price=" + price +
-                ", weight=" + weight +
-                ", freightClass='" + freightClass + '\'' +
-                ", image='" + image + '\'' +
-                '}';
+    public String getLogisticType() {
+        return logisticType;
+    }
+
+    public void setLogisticType(String logisticType) {
+        this.logisticType = logisticType;
+    }
+
+    public String getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(String storeId) {
+        this.storeId = storeId;
+    }
+
+    public String getStoreName() {
+        return storeName;
+    }
+
+    public void setStoreName(String storeName) {
+        this.storeName = storeName;
     }
 }

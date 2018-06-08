@@ -11,14 +11,14 @@ public class SkuParam extends Page {
 
     private String sku;
 
-    private String customerId;
+    private String customerCode;
 
-    public String getCustomerId() {
-        return customerId;
+    public String getCustomerCode() {
+        return customerCode;
     }
 
-    public void setCustomerId(String customerId) {
-        this.customerId = customerId;
+    public void setCustomerCode(String customerCode) {
+        this.customerCode = customerCode;
     }
 
     public String getDesc() {

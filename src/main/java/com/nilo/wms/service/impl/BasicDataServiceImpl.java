@@ -9,6 +9,7 @@ import com.nilo.wms.common.exception.SysErrorCode;
 import com.nilo.wms.common.exception.WMSException;
 import com.nilo.wms.common.util.*;
 import com.nilo.wms.dao.flux.FluxInventoryDao;
+import com.nilo.wms.dao.platform.SkuDao;
 import com.nilo.wms.dto.SkuInfo;
 import com.nilo.wms.dto.StorageInfo;
 import com.nilo.wms.dto.SupplierInfo;
@@ -18,6 +19,7 @@ import com.nilo.wms.dto.flux.FLuxRequest;
 import com.nilo.wms.dto.flux.FluxResponse;
 import com.nilo.wms.dto.outbound.OutboundHeader;
 import com.nilo.wms.dto.outbound.OutboundItem;
+import com.nilo.wms.dto.platform.Sku;
 import com.nilo.wms.dto.platform.parameter.StorageParam;
 import com.nilo.wms.service.BasicDataService;
 import com.nilo.wms.service.HttpRequest;
@@ -27,6 +29,7 @@ import com.nilo.wms.service.platform.SystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 
@@ -46,6 +49,10 @@ public class BasicDataServiceImpl implements BasicDataService {
     private FluxInventoryDao fluxInventoryDao;
     @Autowired
     private SystemService systemService;
+    @Value("#{configProperties['flux_status']}")
+    private String flux_status;
+    @Autowired
+    private SkuDao skuDao;
 
     @Override
     public void updateSku(List<SkuInfo> list) {
@@ -79,6 +86,44 @@ public class BasicDataServiceImpl implements BasicDataService {
         if (!response.isSuccess()) {
             throw new RuntimeException(response.getReturnDesc());
         }
+
+        for (SkuInfo s : list) {
+            Sku sku = skuDao.queryBySku(s.getSku());
+            if (sku == null) {
+                insertSku(s);
+            } else {
+                updateSku(s);
+            }
+        }
+
+    }
+
+    private void insertSku(SkuInfo skuInfo) {
+        Sku sku = new Sku();
+        sku.setSku(skuInfo.getSku());
+        sku.setCustomerCode(skuInfo.getCustomerId());
+        sku.setDesc_c(skuInfo.getDescE());
+        sku.setDesc_e(skuInfo.getDescE());
+        sku.setFreightClass(skuInfo.getFreightClass());
+        sku.setLogisticType(skuInfo.getLogisticsType());
+        sku.setPrice(Double.parseDouble(skuInfo.getPrice()));
+        sku.setStoreId(skuInfo.getStoreId());
+        sku.setStoreName(skuInfo.getStoreName());
+        skuDao.insert(sku);
+    }
+
+    private void updateSku(SkuInfo skuInfo) {
+        Sku sku = new Sku();
+        sku.setSku(skuInfo.getSku());
+        sku.setCustomerCode(skuInfo.getCustomerId());
+        sku.setDesc_c(skuInfo.getDescE());
+        sku.setDesc_e(skuInfo.getDescE());
+        sku.setFreightClass(skuInfo.getFreightClass());
+        sku.setLogisticType(skuInfo.getLogisticsType());
+        sku.setPrice(Double.parseDouble(skuInfo.getPrice()));
+        sku.setStoreId(skuInfo.getStoreId());
+        sku.setStoreName(skuInfo.getStoreName());
+        skuDao.update(sku);
     }
 
     @Override
@@ -122,6 +167,22 @@ public class BasicDataServiceImpl implements BasicDataService {
         param.setWarehouseId(principal.getWarehouseId());
 
         PageResult<StorageInfo> pageResult = new PageResult<>();
+        if (StringUtil.equals(flux_status, "close")) {
+            List<StorageInfo> list = new ArrayList<>();
+            for (String s : param.getSku()) {
+                StorageInfo info = new StorageInfo();
+                String key = RedisUtil.getSkuKey(principal.getClientCode(), s);
+                String lockSto = RedisUtil.hget(key, RedisUtil.LOCK_STORAGE);
+                int lockStoInt = ((lockSto == null ? 0 : Integer.parseInt(lockSto)));
+                String sto = RedisUtil.hget(key, RedisUtil.STORAGE);
+                int stoInt = ((sto == null ? 0 : Integer.parseInt(sto)));
+                info.setCacheStorage(stoInt);
+                info.setLockStorage(lockStoInt);
+                info.setStorage(stoInt);
+            }
+            pageResult.setCount(list.size());
+            pageResult.setData(list);
+        }
 
         Integer count = fluxInventoryDao.queryCountBy(param);
         pageResult.setCount(count);
@@ -383,7 +444,7 @@ public class BasicDataServiceImpl implements BasicDataService {
         cacheSkuKeyList = RedisUtil.keys(RedisUtil.getSkuKey(clientCode, "*"));
 
         List<StorageInfo> notifyList = new ArrayList<>();
-        for(String key : cacheSkuKeyList){
+        for (String key : cacheSkuKeyList) {
             StorageInfo s = new StorageInfo();
             String[] temp = key.split("_sku_");
             s.setSku(temp[1]);
@@ -392,7 +453,7 @@ public class BasicDataServiceImpl implements BasicDataService {
             s.setLockStorage(lockStorage == null ? 0 : Integer.parseInt(lockStorage));
             notifyList.add(s);
         }
-        for(List<StorageInfo> l : ListUtil.averageAssign(notifyList,1000)){
+        for (List<StorageInfo> l : ListUtil.averageAssign(notifyList, 1000)) {
             storageChangeNotify(l);
         }
     }

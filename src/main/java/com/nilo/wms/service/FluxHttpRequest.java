@@ -72,6 +72,9 @@ public class FluxHttpRequest implements HttpRequest<FLuxRequest, FluxResponse> {
     @Value("#{configProperties['flux_key']}")
     private String key;
 
+    @Value("#{configProperties['flux_status']}")
+    private String flux_status;
+
     /**
      * 请求
      *
@@ -82,6 +85,11 @@ public class FluxHttpRequest implements HttpRequest<FLuxRequest, FluxResponse> {
     public FluxResponse doRequest(FLuxRequest fLuxRequest) {
         // 返回值
         FluxResponse response = new FluxResponse();
+        if (StringUtil.equals(flux_status, "close")) {
+            response.setReturnFlag("1");
+            return response;
+        }
+
         Map<String, String> param = new HashMap<>();
         //client_customerid
         param.put("client_customerid", client_customerid);

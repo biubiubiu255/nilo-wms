@@ -7,6 +7,7 @@
            http://www.springframework.org/schema/tx
            http://www.springframework.org/schema/tx/spring-tx.xsd">
     <!-- datasource 读写 -->
+
     <bean id="wms_dataSource" class="com.alibaba.druid.pool.DruidDataSource"
           init-method="init" destroy-method="close">
         <property name="url" value="${wmsjdbc.url}"/>

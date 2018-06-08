@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.nilo.wms.dao.platform.InboundDao">
+<mapper namespace="com.nilo.wms.dao.platform.InboundDetailsDao">
 
 
     <!-- 实体bean与数据字段对应关系 -->
-    <resultMap id="detailMap" type="com.nilo.wms.dto.inbound.InboundDetail">
+    <resultMap id="detailMap" type="com.nilo.wms.dto.platform.inbound.InboundDetail">
         <result property="id" column="id" javaType="java.lang.Long"
                 jdbcType="BIGINT"/>
         <result property="clientCode" column="client_Code" javaType="java.lang.String"
@@ -14,7 +14,6 @@
                 jdbcType="VARCHAR"/>
         <result property="sku" column="sku" javaType="java.lang.String"
                 jdbcType="VARCHAR"/>
-
         <result property="qty" column="qty" javaType="java.lang.Integer"
                 jdbcType="INTEGER"/>
         <result property="receiveQty" column="receive_qty" javaType="java.lang.Integer"
@@ -27,56 +26,24 @@
     </resultMap>
 
 
-    <sql id="Base_Column_List_2">
+    <sql id="Base_Column_List">
         client_code, reference_no, sku, qty, receive_qty, receive_time, status
     </sql>
 
     <!-- 插入语句 -->
-    <insert id="insertDetail" parameterType="com.nilo.wms.dto.inbound.InboundDetail" statementType="PREPARED"
+    <insert id="insertBatch" parameterType="com.nilo.wms.dto.platform.inbound.InboundDetail" statementType="PREPARED"
             useGeneratedKeys="true"
             keyProperty="id">
         INSERT INTO
         t_inbound_detail
-        ( <include refid="Base_Column_List_2"/> )
+        ( <include refid="Base_Column_List"/> )
         VALUES
         (#{clientCode}, #{referenceNo}, #{sku}, #{qty}, #{receiveQty}, #{receiveTime}, #{status})
     </insert>
 
-    <update id="updateDetail" parameterType="com.nilo.wms.dto.inbound.InboundDetail">
-        UPDATE t_inbound_detail set
-        <trim prefix="set" suffixOverrides="," suffix="where client_code=#{clientCode} and reference_no=#{referenceNo} and sku=#{sku}">
-            <if test="status != null">
-                status = #{status},
-                receive_qty = #{receiveQty},
-
-            </if>
-        </trim>
-    </update>
-
-
-<!--    <update id="updateDetails">
-        UPDATE
-        t_inbound_detail
-        SET status = 99
-        WHERE
-        reference_no = #{referenceNo}
-        AND sku IN
-        <foreach collection="list" item="item" separator="," open="(" close=")">
-            #{item}
-        </foreach>
-    </update>-->
-
-    <select id="queryNotComplete" resultMap="detailMap">
+    <select id="queryByReferenceNo" resultMap="detailMap" statementType="PREPARED">
         SELECT
-            b.*
-        FROM
-            t_inbound a
-        INNER JOIN t_inbound_detail b ON b.reference_no = a.reference_no
-        WHERE
-            a.`status` != 99
-        AND b.`status` != 99
-        AND a.`status` != 90
-        AND b.`status` != 90
+        <include refid="Base_Column_List"/>
+        FROM t_inbound_detail where client_code=#{clientCode} and reference_no=#{referenceNo}
     </select>
-
 </mapper>

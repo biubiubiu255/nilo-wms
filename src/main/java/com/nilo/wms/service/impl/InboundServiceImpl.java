@@ -15,16 +15,22 @@ import com.nilo.wms.common.util.XmlUtil;
 import com.nilo.wms.dao.flux.FluxInboundDao;
 import com.nilo.wms.dao.flux.FluxInventoryDao;
 import com.nilo.wms.dao.platform.InboundDao;
+import com.nilo.wms.dao.platform.InboundDetailsDao;
 import com.nilo.wms.dto.StorageInfo;
+import com.nilo.wms.dto.common.PageResult;
 import com.nilo.wms.dto.flux.FLuxRequest;
 import com.nilo.wms.dto.flux.FluxInbound;
 import com.nilo.wms.dto.flux.FluxInboundDetails;
 import com.nilo.wms.dto.flux.FluxResponse;
-import com.nilo.wms.dto.inbound.Inbound;
-import com.nilo.wms.dto.inbound.InboundDetail;
+import com.nilo.wms.dto.platform.inbound.Inbound;
+import com.nilo.wms.dto.platform.inbound.InboundDetail;
 import com.nilo.wms.dto.inbound.InboundHeader;
 import com.nilo.wms.dto.inbound.InboundItem;
+import com.nilo.wms.dto.outbound.OutboundItem;
+import com.nilo.wms.dto.platform.outbound.OutboundDetail;
+import com.nilo.wms.dto.platform.parameter.InboundParam;
 import com.nilo.wms.dto.platform.parameter.StorageParam;
+import com.nilo.wms.dto.platform.system.Permission;
 import com.nilo.wms.service.BasicDataService;
 import com.nilo.wms.service.HttpRequest;
 import com.nilo.wms.service.InboundService;
@@ -32,6 +38,7 @@ import com.nilo.wms.service.platform.RedisUtil;
 import com.nilo.wms.service.platform.SystemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import redis.clients.jedis.Jedis;
 
 import javax.annotation.Resource;
@@ -45,7 +52,8 @@ public class InboundServiceImpl implements InboundService {
 
     @Resource(name = "fluxHttpRequest")
     private HttpRequest<FLuxRequest, FluxResponse> fluxHttpRequest;
-
+    @Autowired
+    private InboundDetailsDao inboundDetailsDao;
     @Autowired
     private InboundDao inboundDao;
     @Autowired
@@ -112,6 +120,16 @@ public class InboundServiceImpl implements InboundService {
         if (!response.isSuccess()) {
             throw new RuntimeException(response.getReturnDesc());
         }
+
+        //保存信息
+        recordInbound(inbound);
+    }
+
+    @Transactional
+    void recordInbound(InboundHeader inbound) {
+        Principal principal = SessionLocal.getPrincipal();
+        String clientCode = principal.getClientCode();
+
         //保存记录
         Inbound insert = new Inbound();
         insert.setClientCode(clientCode);
@@ -123,8 +141,20 @@ public class InboundServiceImpl implements InboundService {
         insert.setAsnType(inbound.getAsnType());
         inboundDao.insert(insert);
 
-        //inbound.getItemList().get(0)
+
+        List<InboundDetail> list = new ArrayList<>();
+        for (InboundItem item : inbound.getItemList()) {
+            InboundDetail itemDO = new InboundDetail();
+            itemDO.setClientCode(principal.getClientCode());
+            itemDO.setSku(item.getSku());
+            itemDO.setQty(item.getQty());
+            itemDO.setReferenceNo(inbound.getReferenceNo());
+            list.add(itemDO);
+        }
+
+        inboundDetailsDao.insertBatch(list);
     }
+
 
     @Override
     public void cancelInBound(String referenceNo) {
@@ -248,7 +278,7 @@ public class InboundServiceImpl implements InboundService {
     @Override
     public void inboundScan() {
 
-        List<InboundDetail> inboundDetails = inboundDao.queryNotComplete();  //获取wms未完成的详细列表
+        /*List<InboundDetail> inboundDetails = inboundDao.queryNotComplete();  //获取wms未完成的详细列表
         if (inboundDetails.isEmpty()) {
             return;
         }
@@ -290,7 +320,50 @@ public class InboundServiceImpl implements InboundService {
                 //inboundDao.update(inbound);
             }
         }
+*/
 
+    }
+
+    @Override
+    public void putAway(String referenceNo) {
+
+        Principal principal = SessionLocal.getPrincipal();
+        String clientCode = principal.getClientCode();
+
+        //查询入库单
+        Inbound inboundDO = inboundDao.queryByReferenceNo(clientCode, referenceNo);
+        if (inboundDO == null) {
+            throw new WMSException(BizErrorCode.CLIENT_ORDER_SN_NOT_EXIST);
+        }
+        List<InboundDetail> itemList = inboundDetailsDao.queryByReferenceNo(clientCode, referenceNo);
+
+        Inbound update = new Inbound();
+        update.setReferenceNo(referenceNo);
+        update.setClientCode(clientCode);
+        update.setStatus(InboundStatusEnum.closed.getCode());
+        inboundDao.update(update);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("status", 99);
+        map.put("client_ordersn", referenceNo);
+        map.put("order_type", inboundDO.getAsnType());
+        map.put("order_items_list", itemList);
+        String data = JSON.toJSONString(map);
+        systemService.notifyDataBus(data, clientCode, "wms_inbound_notify");
+
+    }
+
+    @Override
+    public PageResult<Inbound> queryBy(InboundParam param) {
+
+        Long count = inboundDao.queryCountBy(param);
+        PageResult<Inbound> pageResult = new PageResult<>();
+        if (count == 0) {
+            return pageResult;
+        }
+        List<Inbound> list = inboundDao.queryBy(param);
+        pageResult.setData(list);
+        return pageResult;
 
     }
 

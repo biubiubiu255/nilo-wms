@@ -13,177 +13,19 @@
 
         <input id="searchValue" class="layui-input search-input" type="text"/>&emsp;
 
-        <button id="searchBtn" class="layui-btn search-btn" permission="20041"><i class="layui-icon">&#xe615;</i><span
+        <button id="searchBtn" class="layui-btn search-btn" permission="80011"><i class="layui-icon">&#xe615;</i><span
                 i18n="search"/></button>
-        &emsp;
-
-        <button id="addBtn" class="layui-btn search-btn" permission="20042"><i class="layui-icon">&#xe654;</i><span
-                i18n="add"/>
-        </button>
     </div>
 
 </div>
 <table class="layui-table" id="table" lay-filter="table"></table>
-<!-- 表单弹窗 -->
-<script type="text/html" id="addModel">
-    <form id="editForm" class="layui-form model-form" action="">
-        <input type="hidden" name="_method" value="POST">
-        <div style="width:1200px; height:500px; overflow:auto;">
 
-            <div style="padding: 20px; margin-left: 20px;background-color: #F2F2F2;">
-                <div class="layui-row layui-col-space15">
-                    <div class="layui-col-md12">
-                        <div class="layui-card">
-                            <div class="layui-card-header"><span i18n="basic_info"></span></div>
-                            <div class="layui-card-body">
-
-                                <div class="layui-form-item">
-                                    <div class="layui-inline">
-                                        <label class="layui-form-label"><span i18n="basic_customer"></span></label>
-                                        <div class="layui-input-inline">
-                                            <select name="customerCode" lay-filter="customerCode">
-                                                <option value="kilimall">kilimall</option>
-                                                <option value="nilo">nilo</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="layui-inline">
-                                        <label class="layui-form-label"><span i18n="basic_sku"></span></label>
-                                        <div class="layui-input-inline">
-                                            <input type="text" name="sku" autocomplete="off"
-                                                   class="layui-input">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="layui-form-item">
-                                    <label class="layui-form-label"><span i18n="basic_sku_desc_c"></span></label>
-                                    <div class="layui-input-block">
-                                        <input type="text" name="desc_c" autocomplete="off"
-                                               class="layui-input">
-                                    </div>
-                                </div>
-                                <div class="layui-form-item">
-                                    <label class="layui-form-label"><span i18n="basic_sku_desc_e"></span></label>
-                                    <div class="layui-input-block">
-                                        <input type="text" name="desc_e" autocomplete="off"
-                                               class="layui-input">
-                                    </div>
-                                </div>
-
-                                <div class="layui-form-item">
-                                    <div class="layui-inline">
-                                        <label class="layui-form-label"><span i18n="type"></span></label>
-                                        <div class="layui-input-inline">
-                                            <select name="type" lay-filter="type">
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="layui-inline">
-                                        <label class="layui-form-label"><span i18n="price"></span></label>
-                                        <div class="layui-input-inline">
-                                            <input type="text" name="price" autocomplete="off"
-                                                   class="layui-input">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="layui-col-md12">
-                        <div class="layui-card">
-                            <div class="layui-card-header"><span i18n="spec_info"></span></div>
-                            <div class="layui-card-body">
-                                <div class="layui-form-item">
-                                    <div class="layui-inline">
-                                        <label class="layui-form-label"><span i18n="weight"></span></label>
-                                        <div class="layui-input-inline">
-                                            <input type="text" name="weight" autocomplete="off"
-                                                   class="layui-input">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="layui-form-item">
-                                    <div class="layui-inline">
-                                        <label class="layui-form-label"><span i18n="length"></span></label>
-                                        <div class="layui-input-inline">
-                                            <input type="text" name="length" autocomplete="off"
-                                                   class="layui-input">
-                                        </div>
-                                    </div>
-                                    <div class="layui-inline">
-                                        <label class="layui-form-label"><span i18n="width"></span></label>
-                                        <div class="layui-input-inline">
-                                            <input type="text" name="width" autocomplete="off"
-                                                   class="layui-input">
-                                        </div>
-                                    </div>
-                                    <div class="layui-inline">
-                                        <label class="layui-form-label"><span i18n="height"></span></label>
-                                        <div class="layui-input-inline">
-                                            <input type="text" name="height" autocomplete="off"
-                                                   class="layui-input">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="layui-form-item">
-
-                                    <div class="layui-inline">
-                                        <label class="layui-form-label"><span i18n="battery"></span></label>
-                                        <div class="layui-input-inline">
-                                            <select name="battery" lay-filter="battery">
-                                                <option value="0">不含电池</option>
-                                                <option value="1">含电池</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="layui-col-md12">
-                            <div class="layui-card">
-                                <div class="layui-card-header"><span i18n="image"></span></div>
-                                <div class="layui-card-body">
-                                    <div class="layui-upload">
-                                        <button type="button" class="layui-btn" id="sku_upload_image"><span i18n="upload_image"></span>
-                                        </button>
-                                        <div class="layui-upload-list">
-                                            <img class="layui-upload-img" id="sku_image_show">
-                                            <p id="demoText"></p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-
-                </div>
-            </div>
-        </div>
-        <div class="layui-form-item model-form-footer" style="padding-top: 20px;">
-            <button class="layui-btn layui-btn-primary" type="button" id="btnCancel"><span i18n="cancel"></span>
-            </button>
-            <button class="layui-btn" lay-filter="btnSubmit" lay-submit><span i18n="ok"></span></button>
-        </div>
-    </form>
-</script>
 <!-- 表格操作列 -->
 <div id="barTpl" style="display:none;">
 
-    <button class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit" permission="20043"><span i18n="edit"/>
-    </button>
-
-    <button class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del" permission="20044"><span i18n="delete"/>
+    <button class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del" permission="80012"><span i18n="delete"/>
     </button>
 
 </div>
-<!-- 表格状态列 -->
-<script type="text/html" id="statusTpl">
-    <input type="checkbox" value="{{d.sku}}" lay-filter="statusCB" lay-skin="switch"
-           lay-text="On|Off" {{ d.status== 1?'checked' : '' }}>
-</script>
 
 <script type="text/javascript" src="/static/js/basic/sku.js"></script>

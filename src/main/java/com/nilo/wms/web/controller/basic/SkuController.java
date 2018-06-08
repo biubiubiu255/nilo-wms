@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/sku")
+@RequestMapping("/basic/sku")
 public class SkuController extends BaseController {
     @Autowired
     private SkuService skuService;
 
     @GetMapping
-    @RequiresPermissions("20041")
+    @RequiresPermissions("80011")
     public String list(String searchValue, String searchKey) {
 
         SkuParam param = new SkuParam();
@@ -33,23 +33,9 @@ public class SkuController extends BaseController {
         return toLayUIData(page.getCount(), list);
     }
 
-    @PostMapping
-    @RequiresPermissions("20042")
-    public String add(Sku sku) {
-        skuService.add(sku);
-        return toJsonTrueMsg();
-
-    }
-
-    @PutMapping
-    @RequiresPermissions("20043")
-    public String update(Sku sku) {
-        skuService.update(sku);
-        return toJsonTrueMsg();
-    }
 
     @DeleteMapping("/{sku}")
-    @RequiresPermissions("20044")
+    @RequiresPermissions("80012")
     public String delete(@PathVariable("sku") String sku) {
         skuService.delete(sku);
         return toJsonTrueMsg();

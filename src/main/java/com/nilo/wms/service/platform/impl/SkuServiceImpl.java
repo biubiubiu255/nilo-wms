@@ -26,7 +26,6 @@ public class SkuServiceImpl implements SkuService {
 
         AssertUtil.isNotNull(sku, SysErrorCode.REQUEST_IS_NULL);
         AssertUtil.isNotBlank(sku.getSku(), CheckErrorCode.SKU_EMPTY);
-        AssertUtil.isNotNull(sku.getCustomerId(), CheckErrorCode.CUSTOMER_EMPTY);
         AssertUtil.isNotNull(sku.getDesc_c(), CheckErrorCode.DESC_C_EMPTY);
         AssertUtil.isNotNull(sku.getDesc_e(), CheckErrorCode.DESC_E_EMPTY);
         AssertUtil.isNotNull(sku.getPrice(), CheckErrorCode.PRICE_EMPTY);

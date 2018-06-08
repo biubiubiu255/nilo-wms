@@ -1,8 +1,9 @@
 package com.nilo.wms.dao.platform;
 
 import com.nilo.wms.common.BaseDao;
-import com.nilo.wms.dto.inbound.Inbound;
-import com.nilo.wms.dto.inbound.InboundDetail;
+import com.nilo.wms.dto.platform.inbound.Inbound;
+import com.nilo.wms.dto.platform.inbound.InboundDetail;
+import com.nilo.wms.dto.platform.parameter.InboundParam;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -13,11 +14,9 @@ public interface InboundDao extends BaseDao<Long, Inbound> {
 
     Inbound queryByReferenceNo(@Param(value="clientCode")String clientCode, @Param(value="referenceNo")String referenceNo);
 
-    int insertDetail(InboundDetail inboundDetail);
+    List<Inbound> queryBy(InboundParam param);
 
-    int updateDetail(InboundDetail inboundDetail);
+    Long queryCountBy(InboundParam param);
 
-    //int updateDetails(@Param("referenceNo") String referenceNo, @Param("list") List<String> list);
 
-    List<InboundDetail> queryNotComplete();
 }

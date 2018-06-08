@@ -1,4 +1,4 @@
-package com.nilo.wms.dto.inbound;
+package com.nilo.wms.dto.platform.inbound;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.nilo.wms.common.BaseDo;
