@@ -105,25 +105,51 @@
         <if test="customerCode != null and customerCode != ''">
             and customer_code = #{customerCode}
         </if>
-        <if test="sku != null and sku != ''">
-            and sku = #{sku}
+
+        <if test="skuList !=null and skuList.size() > 0">
+            and sku in
+            <foreach collection="skuList" item="s" index="index"
+                     open="(" close=")" separator=",">
+                #{s}
+            </foreach>
         </if>
+        <if test="storeList !=null and storeList.size() > 0">
+            and store_id in
+            <foreach collection="storeList" item="t" index="index"
+                     open="(" close=")" separator=",">
+                #{t}
+            </foreach>
+        </if>
+
         <if test="desc != null and desc != ''">
             and (desc_e LIKE CONCAT( CONCAT('%',#{desc}),'%') or desc_c LIKE CONCAT( CONCAT('%',#{desc}),'%'))
         </if>
         limit #{offset},#{limit}
     </select>
 
-    <select id="queryByCount" resultType="java.lang.Integer" statementType="PREPARED">
+    <select id="queryByCount" resultType="java.lang.Long" statementType="PREPARED">
         SELECT count(1)
         FROM t_bas_sku
         WHERE 1 = 1
         <if test="customerCode != null and customerCode != ''">
             and customer_code = #{customerCode}
         </if>
-        <if test="sku != null and sku != ''">
-            and sku = #{sku}
+
+        <if test="skuList !=null and skuList.size() > 0">
+            and sku in
+            <foreach collection="skuList" item="s" index="index"
+                     open="(" close=")" separator=",">
+                #{s}
+            </foreach>
         </if>
+        <if test="storeList !=null and storeList.size() > 0">
+            and store_id in
+            <foreach collection="storeList" item="t" index="index"
+                     open="(" close=")" separator=",">
+                #{t}
+            </foreach>
+        </if>
+
         <if test="desc != null and desc != ''">
             and (desc_e LIKE CONCAT( CONCAT('%',#{desc}),'%') or desc_c LIKE CONCAT( CONCAT('%',#{desc}),'%'))
         </if>

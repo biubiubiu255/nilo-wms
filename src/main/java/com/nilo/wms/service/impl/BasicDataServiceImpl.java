@@ -14,12 +14,14 @@ import com.nilo.wms.dto.SkuInfo;
 import com.nilo.wms.dto.StorageInfo;
 import com.nilo.wms.dto.SupplierInfo;
 import com.nilo.wms.dto.common.ClientConfig;
+import com.nilo.wms.dto.common.Page;
 import com.nilo.wms.dto.common.PageResult;
 import com.nilo.wms.dto.flux.FLuxRequest;
 import com.nilo.wms.dto.flux.FluxResponse;
 import com.nilo.wms.dto.outbound.OutboundHeader;
 import com.nilo.wms.dto.outbound.OutboundItem;
 import com.nilo.wms.dto.platform.Sku;
+import com.nilo.wms.dto.platform.parameter.SkuParam;
 import com.nilo.wms.dto.platform.parameter.StorageParam;
 import com.nilo.wms.service.BasicDataService;
 import com.nilo.wms.service.HttpRequest;
@@ -168,10 +170,22 @@ public class BasicDataServiceImpl implements BasicDataService {
 
         PageResult<StorageInfo> pageResult = new PageResult<>();
         if (StringUtil.equals(flux_status, "close")) {
+
+            SkuParam skuParam = new SkuParam();
+            skuParam.setSkuList(param.getSku());
+            skuParam.setStoreList(param.getStoreId());
+            skuParam.setCustomerCode(param.getCustomerId());
+            skuParam.setPageInfo(new Page((param.getPage() - 1) * param.getLimit(), param.getLimit()));
+
+            Long count = skuDao.queryByCount(skuParam);
+            pageResult.setCount(count.intValue());
+
+            List<Sku> skuList = skuDao.queryBy(skuParam);
+
             List<StorageInfo> list = new ArrayList<>();
-            for (String s : param.getSku()) {
+            for (Sku s : skuList) {
                 StorageInfo info = new StorageInfo();
-                String key = RedisUtil.getSkuKey(principal.getClientCode(), s);
+                String key = RedisUtil.getSkuKey(principal.getClientCode(), s.getSku());
                 String lockSto = RedisUtil.hget(key, RedisUtil.LOCK_STORAGE);
                 int lockStoInt = ((lockSto == null ? 0 : Integer.parseInt(lockSto)));
                 String sto = RedisUtil.hget(key, RedisUtil.STORAGE);
@@ -179,9 +193,11 @@ public class BasicDataServiceImpl implements BasicDataService {
                 info.setCacheStorage(stoInt);
                 info.setLockStorage(lockStoInt);
                 info.setStorage(stoInt);
+                list.add(info);
             }
-            pageResult.setCount(list.size());
             pageResult.setData(list);
+
+            return pageResult;
         }
 
         Integer count = fluxInventoryDao.queryCountBy(param);
@@ -394,9 +410,24 @@ public class BasicDataServiceImpl implements BasicDataService {
         param.setCustomerId(config.getCustomerCode());
         param.setPage(1);
         param.setLimit(20000);
-        List<StorageInfo> list = fluxInventoryDao.queryBy(param);
-        if (list == null || list.size() == 0) return;
+        List<StorageInfo> list = new ArrayList<>();
 
+        if (StringUtil.equals(flux_status, "close")) {
+            SkuParam p = new SkuParam();
+            p.setCustomerCode(config.getCustomerCode());
+            p.setPageInfo(new Page(0, 10000));
+            List<Sku> skuList = skuDao.queryBy(p);
+            for (Sku sku : skuList) {
+                StorageInfo storageInfo = new StorageInfo();
+                storageInfo.setSku(sku.getSku());
+                storageInfo.setStorage(100);
+                storageInfo.setStoreId(sku.getStoreId());
+                list.add(storageInfo);
+            }
+        } else {
+            list = fluxInventoryDao.queryBy(param);
+        }
+        if (list == null || list.size() == 0) return;
 
         Set<String> cacheSkuKeyList = RedisUtil.keys(RedisUtil.getSkuKey(clientCode, "*"));
 

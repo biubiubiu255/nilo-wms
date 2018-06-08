@@ -37,6 +37,7 @@ import com.nilo.wms.service.InboundService;
 import com.nilo.wms.service.platform.RedisUtil;
 import com.nilo.wms.service.platform.SystemService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import redis.clients.jedis.Jedis;
@@ -64,7 +65,8 @@ public class InboundServiceImpl implements InboundService {
     private FluxInboundDao fluxInboundDao;
     @Autowired
     private SystemService systemService;
-
+    @Value("#{configProperties['flux_status']}")
+    private String flux_status;
     @Override
     public void createInBound(InboundHeader inbound) {
 
@@ -265,6 +267,17 @@ public class InboundServiceImpl implements InboundService {
         AssertUtil.isNotBlank(referenceNo, CheckErrorCode.CLIENT_ORDER_EMPTY);
 
         Principal principal = SessionLocal.getPrincipal();
+
+        if(StringUtil.equals("close",flux_status)){
+            Inbound i = inboundDao.queryByReferenceNo(principal.getClientCode(), referenceNo);
+            if (i == null) {
+                throw new WMSException(BizErrorCode.CLIENT_ORDER_SN_NOT_EXIST);
+            }
+            FluxInbound inbound = new FluxInbound();
+            inbound.setStatus(i.getStatus());
+            inbound.setReferenceNo(referenceNo);
+            return inbound;
+        }
         FluxInbound inbound = fluxInboundDao.queryByReferenceNo(principal.getCustomerId(), referenceNo);
         if (inbound == null) {
             throw new WMSException(BizErrorCode.CLIENT_ORDER_SN_NOT_EXIST);

@@ -69,10 +69,10 @@ public class SkuServiceImpl implements SkuService {
 
         List<Sku> list = new ArrayList<>();
 
-        int count = skuDao.queryByCount(param);
+        Long count = skuDao.queryByCount(param);
         if (count == 0) return list;
 
-        param.setCount(count);
+        param.setCount(count.intValue());
         list = skuDao.queryBy(param);
         return list;
     }

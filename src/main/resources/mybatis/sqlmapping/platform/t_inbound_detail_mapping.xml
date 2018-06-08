@@ -32,13 +32,14 @@
 
     <!-- 插入语句 -->
     <insert id="insertBatch" parameterType="com.nilo.wms.dto.platform.inbound.InboundDetail" statementType="PREPARED"
-            useGeneratedKeys="true"
-            keyProperty="id">
+            useGeneratedKeys="true" >
         INSERT INTO
         t_inbound_detail
         ( <include refid="Base_Column_List"/> )
         VALUES
-        (#{clientCode}, #{referenceNo}, #{sku}, #{qty}, #{receiveQty}, #{receiveTime}, #{status})
+        <foreach collection="list" item="item" index="index" separator=",">
+        (#{item.clientCode}, #{item.referenceNo}, #{item.sku}, #{item.qty}, #{item.receiveQty}, #{item.receiveTime}, #{item.status})
+        </foreach>
     </insert>
 
     <select id="queryByReferenceNo" resultMap="detailMap" statementType="PREPARED">

@@ -12,7 +12,7 @@ public interface SkuDao extends BaseDao<Integer, Sku> {
 
     int deleteBySku(String sku);
 
-    int queryByCount(SkuParam param);
+    Long queryByCount(SkuParam param);
 
     List<Sku> queryBy(SkuParam param);
 
