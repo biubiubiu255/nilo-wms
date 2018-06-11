@@ -39,7 +39,7 @@
     <!-- 通知调度配置 begin  -->
     <bean id="orderhandlerTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="orderhandlerTriggerDetail"/>
-        <property name="cronExpression" value="0 43 11 ? * *"/>
+        <property name="cronExpression" value="0 20 0 ? * *"/>
     </bean>
 
     <bean id="orderhandlerTriggerDetail"
