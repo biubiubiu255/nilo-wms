@@ -74,7 +74,6 @@ public class OutboundServiceImpl implements OutboundService {
         AssertUtil.isNotBlank(outBound.getChannel(), CheckErrorCode.DELIVERY_TYPE_EMPTY);
         AssertUtil.isNotBlank(outBound.getIsCod(), CheckErrorCode.IS_POD_EMPTY);
         AssertUtil.isNotBlank(outBound.getDeliveryNo(), CheckErrorCode.WAYBILL_EMPTY);
-        AssertUtil.isFalse(outBound.getOrderAmount() == 0, CheckErrorCode.ORDER_AMOUNT_EMPTY);
         AssertUtil.isNotNull(outBound.getItemList(), CheckErrorCode.ITEM_EMPTY);
         AssertUtil.isNotNull(outBound.getReceiverInfo(), CheckErrorCode.RECEIVER_INFO_EMPTY);
         AssertUtil.isNotBlank(outBound.getReceiverInfo().getReceiverAddress(), CheckErrorCode.RECEIVER_ADDRESS_EMPTY);
@@ -90,7 +89,9 @@ public class OutboundServiceImpl implements OutboundService {
         String clientCode = principal.getClientCode();
 
         Outbound outboundDO = outboundDao.queryByReferenceNo(clientCode, outBound.getOrderNo());
-        if (outboundDO != null) return;
+        if (outboundDO != null) {
+            return;
+        }
 
         // 判断订单号是否锁定库存过
         String orderNoKey = RedisUtil.getLockOrderKey(clientCode, outBound.getOrderNo());
