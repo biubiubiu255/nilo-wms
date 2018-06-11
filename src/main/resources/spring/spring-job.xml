@@ -96,7 +96,7 @@
     <!-- 通知调度配置 begin  -->
     <bean id="syncStorageTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="syncStorageTriggerDetail"/>
-        <property name="cronExpression" value="0 30 3 ? * *"/>
+        <property name="cronExpression" value="0 55 3 ? * *"/>
     </bean>
 
     <bean id="syncStorageTriggerDetail"

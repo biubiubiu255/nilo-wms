@@ -486,7 +486,7 @@ public class BasicDataServiceImpl implements BasicDataService {
             s.setLockStorage(lockStorage == null ? 0 : Integer.parseInt(lockStorage));
             notifyList.add(s);
         }
-        for (List<StorageInfo> l : ListUtil.averageAssign(notifyList, 1000)) {
+        for (List<StorageInfo> l : ListUtil.averageAssign(notifyList, 100)) {
             storageChangeNotify(l);
         }
     }
