@@ -8,8 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
 
 /**
  * 入仓费用
@@ -31,7 +30,22 @@ public class ReturnMerchantHandlerFeeScheduler {
             //查询入库
             List<Fee> list = feeService.queryReturnMerchantHandlerFee("kilimall", dateString);
             //写入 nos
-            feeService.syncToNOS(list, "kilimall", dateString, MoneyType.Return_Merchant.getCode());
+            //按店铺推送
+            Map<String, List<Fee>> map = new HashMap<>();
+            for (Fee f : list) {
+                if (map.containsKey(f.getStore_id())) {
+                    List<Fee> storeFee = map.get(f.getStore_id());
+                    storeFee.add(f);
+                } else {
+                    List<Fee> storeFee = new ArrayList<>();
+                    storeFee.add(f);
+                    map.put(f.getStore_id(), storeFee);
+                }
+            }
+
+            for (Map.Entry<String, List<Fee>> entry : map.entrySet()) {
+                feeService.syncToNOS(entry.getValue(), "kilimall", dateString, MoneyType.Return_Merchant.getCode());
+            }
             logger.info("====start return merchant fee====");
         } catch (Exception ex) {
             logger.error("get delivery fee faild.", ex.getMessage(), ex);
