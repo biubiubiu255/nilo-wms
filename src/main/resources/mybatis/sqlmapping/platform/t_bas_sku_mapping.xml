@@ -87,7 +87,7 @@
             <if test="price != null and price != ''">
                 price = #{price},
             </if>
-            <if test="safeStorage != null and safeStorage != ''">
+            <if test="safeStorage != null">
                 safe_storage = #{safeStorage},
             </if>
         </trim>

@@ -195,6 +195,7 @@ public class BasicDataServiceImpl implements BasicDataService {
                 info.setStorage(stoInt);
                 info.setSku(s.getSku());
                 info.setStoreId(s.getStoreId());
+                info.setSafeStorage(s.getSafeStorage());
                 list.add(info);
             }
             pageResult.setData(list);
