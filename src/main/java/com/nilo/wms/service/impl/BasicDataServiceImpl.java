@@ -523,7 +523,16 @@ public class BasicDataServiceImpl implements BasicDataService {
         }
 
         if (safeStorage != null) {
-            fluxInventoryDao.updateSafeQty(principal.getCustomerId(), sku, safeStorage.toString());
+            if (StringUtil.equals(flux_status, "close")) {
+                Sku s = new Sku();
+                s.setSku(sku);
+                s.setSafeStorage(safeStorage);
+                skuDao.update(s);
+            } else {
+                fluxInventoryDao.updateSafeQty(principal.getCustomerId(), sku, safeStorage.toString());
+            }
+            RedisUtil.hset(key, RedisUtil.SAFE_STORAGE, safeStorage.toString());
+
         }
     }
 

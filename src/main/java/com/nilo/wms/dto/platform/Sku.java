@@ -27,6 +27,16 @@ public class Sku extends BaseDo<Integer> {
 
     private String storeName;
 
+    private Integer safeStorage;
+
+    public Integer getSafeStorage() {
+        return safeStorage;
+    }
+
+    public void setSafeStorage(Integer safeStorage) {
+        this.safeStorage = safeStorage;
+    }
+
     public String getCustomerCode() {
         return customerCode;
     }
