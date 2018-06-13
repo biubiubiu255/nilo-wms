@@ -144,14 +144,14 @@ public class ApiController extends BaseController {
                     break;
             }
         } catch (WMSException e) {
-            addApiLog(param, e.getMessage(), false);
+            addApiLog(param, printStackTraceToString(e), false);
             log.error("API Exception ", e);
             return ResultMap.error(e.getCode(), e.getMessage()).put("response", response).toJson();
         } catch (Exception e) {
-            addApiLog(param, e.getMessage(), false);
+            addApiLog(param, printStackTraceToString(e), false);
             log.error("API Exception ", e);
             return ResultMap.error(e.getMessage()).put("response", response).toJson();
-        }finally {
+        } finally {
             //清除request_id
             RedisUtil.del(param.getRequest_id());
         }

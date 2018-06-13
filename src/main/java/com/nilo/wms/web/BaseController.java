@@ -15,6 +15,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +25,12 @@ import java.util.Map;
 public class BaseController {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
+
+    public static String printStackTraceToString(Throwable t) {
+        StringWriter sw = new StringWriter();
+        t.printStackTrace(new PrintWriter(sw, true));
+        return sw.getBuffer().toString();
+    }
 
     public String getToken(HttpServletRequest request) {
         String token = request.getHeader("token");
