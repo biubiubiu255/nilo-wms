@@ -254,18 +254,14 @@ public class BasicDataServiceImpl implements BasicDataService {
         for (OutboundItem item : header.getItemList()) {
             String sku = item.getSku();
             int qty = item.getQty();
-            String key = RedisUtil.getSkuKey(clientCode, sku);
-            String lockSto = jedis.hget(key, RedisUtil.LOCK_STORAGE);
-            int lockStoInt = lockSto == null ? 0 : Integer.parseInt(lockSto);
-            String sto = jedis.hget(key, RedisUtil.STORAGE);
-            int stoInt = sto == null ? 0 : Integer.parseInt(sto);
+            int lockStoInt = getLockStorage(clientCode, sku);
+            int stoInt = getCacheStorage(clientCode, sku);
             //校验库存是否足够
-            if (sto == null || lockStoInt + qty > stoInt) {
+            if (lockStoInt + qty > stoInt) {
 
                 if (lockStoInt > stoInt) {
                     lockStoInt = stoInt;
                 }
-
                 StorageInfo s = new StorageInfo();
                 s.setSku(sku);
                 s.setStorage(stoInt);
@@ -275,6 +271,7 @@ public class BasicDataServiceImpl implements BasicDataService {
                 continue;
             }
             //记录锁定
+            String key = RedisUtil.getSkuKey(clientCode, sku);
             lockRecord.put(key, lockStoInt + qty);
         }
 
@@ -325,8 +322,7 @@ public class BasicDataServiceImpl implements BasicDataService {
         for (String sku : skuList) {
             int qty = Integer.parseInt(jedis.hget(orderNoKey, sku));
             String key = RedisUtil.getSkuKey(clientCode, sku);
-            String lockSto = jedis.hget(key, RedisUtil.LOCK_STORAGE);
-            int afterLockStorage = Integer.parseInt(lockSto) - qty;
+            int afterLockStorage = getLockStorage(clientCode, sku) - qty;
             jedis.hset(key, RedisUtil.LOCK_STORAGE, "" + afterLockStorage);
         }
 
@@ -358,18 +354,13 @@ public class BasicDataServiceImpl implements BasicDataService {
             int qty = Integer.parseInt(jedis.hget(orderNoKey, sku));
             //扣减锁定库存
             String key = RedisUtil.getSkuKey(clientCode, sku);
-            String lockSto = jedis.hget(key, RedisUtil.LOCK_STORAGE);
-            int afterLockStorage = Integer.parseInt(lockSto) - qty;
+            int afterLockStorage = getLockStorage(clientCode, sku) - qty;
             jedis.hset(key, RedisUtil.LOCK_STORAGE, "" + afterLockStorage);
-
             //扣减库存
-            String sto = jedis.hget(key, RedisUtil.STORAGE);
-            int stoInt = Integer.parseInt(sto) - qty;
+            int stoInt = getCacheStorage(clientCode, sku) - qty;
             jedis.hset(key, RedisUtil.STORAGE, "" + stoInt);
-
             //库存少于安全库存 发送通知
-            String safeSto = jedis.hget(key, RedisUtil.SAFE_STORAGE);
-            int safeInt = Integer.parseInt(safeSto == null ? "0" : safeSto);
+            int safeInt = getSafeStorage(clientCode, sku);
             if (stoInt < safeInt) {
                 String storeId = jedis.hget(key, RedisUtil.STORE);
                 StorageInfo info = new StorageInfo();
@@ -390,6 +381,24 @@ public class BasicDataServiceImpl implements BasicDataService {
         String data = JSON.toJSONString(map);
         systemService.notifyDataBus(data, clientCode, "storage_not_enough");
 
+    }
+
+    private int getCacheStorage(String clientCode, String sku) {
+        String key = RedisUtil.getSkuKey(clientCode, sku);
+        String sto = RedisUtil.hget(key, RedisUtil.STORAGE);
+        return sto == null ? 0 : Integer.parseInt(sto);
+    }
+
+    private int getLockStorage(String clientCode, String sku) {
+        String key = RedisUtil.getSkuKey(clientCode, sku);
+        String sto = RedisUtil.hget(key, RedisUtil.LOCK_STORAGE);
+        return sto == null ? 0 : Integer.parseInt(sto);
+    }
+
+    private int getSafeStorage(String clientCode, String sku) {
+        String key = RedisUtil.getSkuKey(clientCode, sku);
+        String sto = RedisUtil.hget(key, RedisUtil.SAFE_STORAGE);
+        return sto == null ? 0 : Integer.parseInt(sto);
     }
 
     @Override
@@ -445,8 +454,7 @@ public class BasicDataServiceImpl implements BasicDataService {
             String key = RedisUtil.getSkuKey(clientCode, s.getSku());
             String storage = jedis.hget(key, RedisUtil.STORAGE);
             if (!StringUtil.equals(storage, "" + s.getStorage())) {
-                String lockStorage = jedis.hget(key, RedisUtil.LOCK_STORAGE);
-                s.setLockStorage(lockStorage == null ? 0 : Integer.parseInt(lockStorage));
+                s.setLockStorage(getLockStorage(clientCode, s.getSku()));
                 diffList.add(s);
                 continue;
             }
@@ -483,8 +491,7 @@ public class BasicDataServiceImpl implements BasicDataService {
             String[] temp = key.split("_sku_");
             s.setSku(temp[1]);
             s.setStorage(Integer.parseInt(jedis.hget(key, RedisUtil.STORAGE)));
-            String lockStorage = jedis.hget(key, RedisUtil.LOCK_STORAGE);
-            s.setLockStorage(lockStorage == null ? 0 : Integer.parseInt(lockStorage));
+            s.setLockStorage(getLockStorage(clientCode, temp[1]));
             notifyList.add(s);
         }
         for (List<StorageInfo> l : ListUtil.averageAssign(notifyList, 100)) {
@@ -547,11 +554,8 @@ public class BasicDataServiceImpl implements BasicDataService {
         List<StorageInfo> notifyList = new ArrayList<>();
 
         for (String s : sku) {
-            String key = RedisUtil.getSkuKey(clientCode, s);
-            String sto = RedisUtil.hget(key, RedisUtil.STORAGE);
-            String lockSto = RedisUtil.hget(key, RedisUtil.LOCK_STORAGE);
-            int lockStoInt = lockSto == null ? 0 : Integer.parseInt(lockSto);
-            int stoInt = sto == null ? 0 : Integer.parseInt(sto);
+            int lockStoInt = getLockStorage(clientCode,s);
+            int stoInt = getCacheStorage(clientCode,s);
             StorageInfo storageInfo = new StorageInfo();
             storageInfo.setSku(s);
             storageInfo.setCacheStorage(stoInt);
@@ -559,7 +563,6 @@ public class BasicDataServiceImpl implements BasicDataService {
             storageInfo.setLockStorage(lockStoInt);
             notifyList.add(storageInfo);
         }
-
         //通知上游系统 库存变更
         storageChangeNotify(notifyList);
     }
