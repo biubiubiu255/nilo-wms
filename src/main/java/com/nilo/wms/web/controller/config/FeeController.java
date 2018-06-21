@@ -18,15 +18,39 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/fee")
 public class FeeController extends BaseController {
+
+    private static final Map<String, String> map = new HashMap<>();
+
+    static {
+
+        map.put("1057", "Phones&Accessories");
+        map.put("1072", "Computer&Tablets");
+        map.put("1250", "Electronics&Appliances");
+        map.put("1466", "Home&Living");
+        map.put("1294", "Clothes");
+        map.put("1350", "Shoes");
+        map.put("1385", "Bags&Fashion");
+        map.put("1425", "Sports");
+        map.put("1615", "Beauty&Hair");
+        map.put("1504", "Kids");
+        map.put("1563", "Office Products");
+        map.put("1603", "Automotive");
+        map.put("Other", "Other");
+
+    }
+
     @Autowired
     private FeeConfigDao feeConfigDao;
     @Autowired
     private SystemService systemService;
+
     @GetMapping
     @RequiresPermissions("50031")
     public String list(String searchValue, String searchKey) {
@@ -42,6 +66,10 @@ public class FeeController extends BaseController {
         if (count != 0) {
             list = feeConfigDao.queryBy(parameter);
         }
+        for (FeeConfig c : list) {
+            c.setClassTypeDesc(map.get(c.getClassType()));
+        }
+
         return toLayUIData(count, list);
     }
 

@@ -14,7 +14,7 @@ $(function () {
             {type: 'numbers'},
             {field: 'clientCode', sort: true, title: getI18nAttr('config_client_code')},
             {field: 'feeType', sort: true, title: getI18nAttr('config_fee_type')},
-            {field: 'classType', sort: true, title: getI18nAttr('config_fee_class')},
+            {field: 'classTypeDesc', sort: true, title: getI18nAttr('config_fee_class')},
             {field: 'firstPrice', sort: true, title: getI18nAttr('config_fee_first_price')},
             {field: 'secondPrice', sort: true, title: getI18nAttr('config_fee_second_price')},
             {
@@ -129,14 +129,14 @@ function showEditModel(data) {
     });
     $("#editForm")[0].reset();
     if (data != null) {
-        $("#editForm input[name=feeType]").val(data.feeType);
-        $("#editForm input[name=classType]").val(data.classType);
+        $("#editForm select[name=feeType]").val(data.feeType);
+        $("#editForm select[name=classType]").val(data.classType);
         $("#editForm input[name=firstPrice]").val(data.firstPrice);
         $("#editForm input[name=secondPrice]").val(data.secondPrice);
 
         $("#editForm input[name=_method]").val("PUT");
         $("#editForm input[name=feeType]").attr("disabled", true);
-
+        layui.form.render('select');
     }
     $("#btnCancel").click(function () {
         layer.closeAll('page');

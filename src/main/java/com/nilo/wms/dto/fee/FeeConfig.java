@@ -13,9 +13,19 @@ public class FeeConfig extends BaseDo<Long> {
 
     private String classType;
 
+    private String classTypeDesc;
+
     private Double firstPrice;
 
     private Double secondPrice;
+
+    public String getClassTypeDesc() {
+        return classTypeDesc;
+    }
+
+    public void setClassTypeDesc(String classTypeDesc) {
+        this.classTypeDesc = classTypeDesc;
+    }
 
     public String getClientCode() {
         return clientCode;

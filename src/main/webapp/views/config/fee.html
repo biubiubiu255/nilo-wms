@@ -6,12 +6,17 @@
     <div class="layui-form toolbar">
         <span i18n="search"></span>：
         <select id="searchKey">
-            <option value="" i18n="please_select"></option>
-            <option value="feeType" i18n="config_fee_type"></option>
-            <option value="classType" i18n="config_fee_class"></option>
+            <option value="feeType">Fee Type</option>
         </select>
 
-        <input id="searchValue" class="layui-input search-input" type="text"/>&emsp;
+        <select id="searchValue">
+            <option value="" i18n="please_select"></option>
+            <option value="storage" >Storage</option>
+            <option value="inbound" >Inbound</option>
+            <option value="handle" >Handle</option>
+            <option value="return" >Return Order</option>
+            <option value="return_merchant" >Return Merchant</option>
+        </select>
         <button id="searchBtn" class="layui-btn search-btn" permission="50031"><i class="layui-icon">&#xe615;</i><span i18n="search"/></button>
         &emsp;
         <button id="addBtn" class="layui-btn search-btn" permission="50032"><i class="layui-icon">&#xe654;</i><span i18n="add"/>
@@ -29,13 +34,35 @@
         <div class="layui-form-item">
             <label class="layui-form-label"><span i18n="config_fee_type"></span></label>
             <div class="layui-input-block">
-                <input name="feeType" type="text" class="layui-input" maxlength="20" lay-verify="required" required/>
+                <select id="feeType" name="feeType" lay-verify="required" required>
+                    <option value="" i18n="please_select"></option>
+                    <option value="storage" >Storage</option>
+                    <option value="inbound" >Inbound</option>
+                    <option value="handle" >Handle</option>
+                    <option value="return" >Return Order</option>
+                    <option value="return_merchant" >Return Merchant</option>
+                </select>
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label"><span i18n="config_fee_class"></span></label>
             <div class="layui-input-block">
-                <input name="classType" type="text" class="layui-input" maxlength="20" lay-verify="required" required/>
+                <select id="classType" name="classType" lay-verify="required" required>
+                    <option value="" i18n="please_select"></option>
+                    <option value="1057" >Phones&Accessories</option>
+                    <option value="1072" >Computer&Tablets</option>
+                    <option value="1250" >Electronics&Appliances</option>
+                    <option value="1466" >Home&Living</option>
+                    <option value="1294" >Clothes</option>
+                    <option value="1350" >Shoes</option>
+                    <option value="1385" >Bags&Fashion</option>
+                    <option value="1425" >Sports</option>
+                    <option value="1615" >Beauty&Hair</option>
+                    <option value="1504" >Kids</option>
+                    <option value="1563" >Office Products</option>
+                    <option value="1603" >Automotive</option>
+
+                </select>
             </div>
         </div>
         <div class="layui-form-item">
