@@ -94,7 +94,6 @@ function showEditModel(data) {
     $("#editForm")[0].reset();
     $("#editForm").attr("method", "POST");
     var selectItem = "";
-    var selectItemWarehouse = "";
     if (data != null) {
         $("#editForm input[name=userId]").val(data.userId);
         $("#editForm input[name=username]").val(data.username);
@@ -116,8 +115,6 @@ function showEditModel(data) {
         layer.closeAll('page');
     });
     getRoles(selectItem);
-    drawWarehouseSelect(selectItemWarehouse);
-
 }
 
 //获取所有角色
