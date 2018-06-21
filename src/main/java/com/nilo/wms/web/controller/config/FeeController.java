@@ -9,6 +9,7 @@ import com.nilo.wms.dao.platform.FeeConfigDao;
 import com.nilo.wms.dao.platform.InterfaceConfigDao;
 import com.nilo.wms.dto.common.InterfaceConfig;
 import com.nilo.wms.dto.common.ResultMap;
+import com.nilo.wms.dto.fee.Fee;
 import com.nilo.wms.dto.fee.FeeConfig;
 import com.nilo.wms.dto.platform.parameter.FeeConfigParam;
 import com.nilo.wms.dto.platform.parameter.UserParam;
@@ -77,8 +78,14 @@ public class FeeController extends BaseController {
     @RequiresPermissions("50032")
     public String add(FeeConfig config) {
 
-        config.setClientCode(SessionLocal.getPrincipal().getClientCode());
-        feeConfigDao.insert(config);
+        String clientCode = SessionLocal.getPrincipal().getClientCode();
+        config.setClientCode(clientCode);
+        FeeConfig c = feeConfigDao.getBy(clientCode, config.getFeeType(), config.getClassType());
+        if (c != null) {
+            feeConfigDao.update(config);
+        } else {
+            feeConfigDao.insert(config);
+        }
         return ResultMap.success().toJson();
     }
 

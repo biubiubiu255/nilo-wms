@@ -1,0 +1,153 @@
+<div class="content-header">
+	<span class="layui-breadcrumb">
+	  <a href="#!home"><span i18n="home_page"></span></a>
+	  <a><cite><span i18n="schedule_mgn"></span> </cite></a>
+	</span>
+</div>
+<table class="layui-table" id="table" lay-filter="table"></table>
+<!-- 表单弹窗 -->
+<script type="text/html" id="addModel">
+    <form id="editForm" class="layui-form model-form" action="">
+        <input name="_method" value="POST" type="hidden"/>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span i18n="schedule_job_name"></span></label>
+            <div class="layui-input-block">
+                <input name="jobName" type="text" class="layui-input" maxlength="20" lay-verify="required" disabled/>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span i18n="schedule_corn"></span></label>
+            <div class="layui-input-block">
+                <input name="cornExpression" type="text" class="layui-input" lay-verify="required" required/>
+            </div>
+        </div>
+
+        <div class="layui-form-item model-form-footer">
+            <button class="layui-btn layui-btn-primary" type="button" id="btnCancel"><span i18n="cancel"></span>
+            </button>
+            <button class="layui-btn" lay-filter="btnSubmit" lay-submit><span i18n="ok"></span></button>
+        </div>
+    </form>
+</script>
+<!-- 表格操作列 -->
+<div id="barTpl" style="display:none;">
+    <button class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit" permission="50041"><span
+            i18n="edit"></span></button>
+</div>
+
+<!-- 表格状态列 -->
+<script type="text/html" id="statusTpl">
+    <input type="checkbox" value="{{d.jobName}}" lay-filter="statusCB" lay-skin="switch"
+           lay-text="On|Off" {{ d.status== 1?'checked' : '' }}>
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        //监听状态开关操作
+        layui.form.on('switch(statusCB)', function (obj) {
+            updateStatus(obj);
+        });
+        refreshPermission();
+        refreshI18n();
+        //渲染表格
+        layui.table.render({
+            elem: '#table',
+            url: '/servlet/schedule',
+            where: {
+                token: getToken()
+            },
+            page: true,
+            cols: [[
+                {type: 'numbers'},
+                {field: 'jobName', sort: true, title: getI18nAttr('schedule_job_name')},
+                {field: 'className', sort: true, title: getI18nAttr('schedule_class_name')},
+                {field: 'cornExpression', sort: true, title: getI18nAttr('schedule_corn')},
+                {field: 'status', sort: true, templet: '#statusTpl', width: 80, title: getI18nAttr('status')},
+                {field: 'remark', sort: true, title: getI18nAttr('remark')},
+                {align: 'center', toolbar: '#barTpl', minWidth: 180, title: getI18nAttr('opt')}
+            ]]
+        });
+
+        //表单提交事件
+        layui.form.on('submit(btnSubmit)', function (data) {
+            data.field.token = getToken();
+            data.field._method = $("#editForm").attr("method");
+            layer.load(2);
+            $.post("/servlet/schedule/modify_corn", data.field, function (data) {
+                layer.closeAll('loading');
+                if ("succ" == data.status) {
+                    layer.msg("SUCCESS", {icon: 1});
+                    layer.closeAll('page');
+                    layui.table.reload('table', {});
+                } else {
+                    layer.msg(data.error, {icon: 2});
+                }
+            }, "JSON");
+            return false;
+        });
+
+        //工具条点击事件
+        layui.table.on('tool(table)', function (obj) {
+            var data = obj.data;
+            var layEvent = obj.event;
+
+            if (layEvent === 'edit') { //修改
+                showEditModel(data);
+            }
+        });
+
+        //显示表单弹窗
+        function showEditModel(data) {
+            layer.open({
+                type: 1,
+                title: getI18nAttr('edit'),
+                area: '450px',
+                offset: '120px',
+                content: $("#addModel").html(),
+                success: function(layero, index){
+                    refreshI18n(layero);
+                }
+            });
+
+            $("#editForm")[0].reset();
+            $("#editForm").attr("method", "PUT");
+            var selectItem = "";
+            var selectItemWarehouse = "";
+            if (data != null) {
+                $("#editForm input[name=jobName]").val(data.jobName);
+                $("#editForm input[name=cornExpression]").val(data.cornExpression);
+            }
+            $("#btnCancel").click(function () {
+                layer.closeAll('page');
+            });
+        }
+
+        //更改状态
+        function updateStatus(obj) {
+            var load = layer.load(2);
+            var newStatus = obj.elem.checked ? 1 : 0;
+            $.post("/servlet/schedule/status", {
+                jobName: obj.elem.value,
+                status: newStatus,
+                _method: "PUT",
+                token: getToken()
+            }, function (data) {
+                layer.close(load);
+                if (data.status == 'succ') {
+                    layer.msg("SUCCESS", {icon: 1},function () {
+                        layui.table.reload('table', {});
+                    });
+                } else {
+                    layer.msg(data.error, {icon: 2, time: 2000}, function () {
+                        layui.table.reload('table', {});
+                    });
+                }
+            },"JSON");
+        }
+
+
+    });
+
+</script>

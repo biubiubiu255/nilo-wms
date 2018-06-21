@@ -80,4 +80,8 @@
         delete from t_config_fee  where client_code = #{clientCode} and class = #{classType} and  fee_Type = #{feeType}
 
     </delete>
+
+    <select id="getBy" resultMap="feeConfig" statementType="PREPARED">
+        select *  from t_config_fee  where client_code = #{clientCode} and class = #{classType} and  fee_Type = #{feeType}
+    </select>
 </mapper>

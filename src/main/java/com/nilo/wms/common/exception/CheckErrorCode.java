@@ -58,6 +58,10 @@ public enum CheckErrorCode implements ErrorCode {
     DESC_C_EMPTY("desc_c empty.", "100055"),
     DESC_E_EMPTY("desc_e empty.", "100056"),
     PRICE_EMPTY("price empty.", "100057"),
+
+    JOB_NAME_EMPTY("job name empty.", "100058"),
+
+
     ;
 
     private final String description;

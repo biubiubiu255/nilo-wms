@@ -15,6 +15,8 @@ public interface FeeConfigDao extends BaseDao<Long, FeeConfig> {
 
     Integer queryCountBy(FeeConfigParam param);
 
+    FeeConfig getBy(@Param("clientCode") String clientCode, @Param("feeType") String feeType, @Param("classType") String classType);
+
     Integer delete(@Param("clientCode") String clientCode, @Param("feeType") String feeType, @Param("classType") String classType);
 
 }

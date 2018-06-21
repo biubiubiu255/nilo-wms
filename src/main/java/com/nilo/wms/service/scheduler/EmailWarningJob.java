@@ -4,33 +4,45 @@ import com.nilo.wms.common.util.MailInfo;
 import com.nilo.wms.common.util.SendEmailUtil;
 import com.nilo.wms.dao.platform.NotifyDao;
 import com.nilo.wms.dto.platform.Notify;
+import com.nilo.wms.service.platform.SpringContext;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
  * 订单操作费
  * Created by Administrator on 2017/6/9.
  */
-public class EmailScheduler {
+public class EmailWarningJob implements Job{
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
-    private NotifyDao notifyDao;
+    private static AtomicBoolean RUN = new AtomicBoolean(false);
 
-    public void execute() throws Throwable {
+    @Override
+    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         try {
-            List<Notify> failedList = notifyDao.queryFailed();
-            if (failedList == null || failedList.size() == 0) return;
-            //发送邮件
-            sendFailedEmail(failedList);
+            if (RUN.compareAndSet(false, true)) {
+                NotifyDao notifyDao = SpringContext.getBean(NotifyDao.class);
+                List<Notify> failedList = notifyDao.queryFailed();
+                if (failedList == null || failedList.size() == 0) return;
+                //发送邮件
+                sendFailedEmail(failedList);
 
+            } else {
+                logger.info("Already Execute EmailWarningJob.........");
+            }
         } catch (Exception ex) {
-            logger.error("Email faild.", ex.getMessage(), ex);
+            logger.error("EmailWarningJob failed. {}", ex.getMessage(), ex);
+        } finally {
+            RUN.set(false);
         }
     }
 
@@ -53,5 +65,4 @@ public class EmailScheduler {
         }
         return start + content.toString() + end;
     }
-
 }

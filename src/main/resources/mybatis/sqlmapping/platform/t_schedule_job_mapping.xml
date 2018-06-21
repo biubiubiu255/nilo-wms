@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nilo.wms.dao.platform.ScheduleJobDao">
+
+    <!-- 实体bean与数据字段对应关系 -->
+    <resultMap id="job" type="com.nilo.wms.dto.ScheduleJob">
+        <result property="jobName" column="job_name" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="className" column="class_name" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="cornExpression" column="corn_expression" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="remark" column="remark" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="status" column="status" javaType="java.lang.Integer"
+                jdbcType="INTEGER"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id ,job_name,class_name,corn_expression,remark
+    </sql>
+    <!-- 插入语句 -->
+    <insert id="insert" parameterType="com.nilo.wms.dto.ScheduleJob" statementType="PREPARED"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO t_config_job
+        ( job_name,class_name,corn_expression,remark)
+        VALUES
+        (#{jobName},#{className}, #{cornExpression},#{remark})
+    </insert>
+
+    <update id="update" parameterType="com.nilo.wms.dto.ScheduleJob" statementType="PREPARED">
+        update t_config_job
+        <trim prefix="set" suffixOverrides="," suffix="where job_name=#{jobName}">
+
+            <if test="className != null">
+                class_name = #{className},
+            </if>
+            <if test="cornExpression != null">
+                corn_expression = #{cornExpression},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+        </trim>
+    </update>
+    <select id="listAll" resultMap="job" statementType="PREPARED">
+        SELECT *
+        FROM t_config_job
+    </select>
+    <select id="getByJobName" resultMap="job" statementType="PREPARED">
+        SELECT *
+        FROM t_config_job where job_name=#{jobName}
+    </select>
+</mapper>
