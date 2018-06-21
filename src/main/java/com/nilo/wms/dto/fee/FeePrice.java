@@ -7,23 +7,23 @@ import java.math.BigDecimal;
  */
 public class FeePrice {
 
-    private BigDecimal firstPrice;
+    private Double firstPrice;
 
-    private BigDecimal nextPrice;
+    private Double nextPrice;
 
-    public BigDecimal getFirstPrice() {
+    public Double getFirstPrice() {
         return firstPrice;
     }
 
-    public void setFirstPrice(BigDecimal firstPrice) {
+    public void setFirstPrice(Double firstPrice) {
         this.firstPrice = firstPrice;
     }
 
-    public BigDecimal getNextPrice() {
+    public Double getNextPrice() {
         return nextPrice;
     }
 
-    public void setNextPrice(BigDecimal nextPrice) {
+    public void setNextPrice(Double nextPrice) {
         this.nextPrice = nextPrice;
     }
 }

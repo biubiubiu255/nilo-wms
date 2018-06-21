@@ -98,9 +98,9 @@ public class SystemServiceImpl implements SystemService {
             Map<String, FeePrice> feeConf = new HashMap<>();
             for (FeeConfig c : list) {
                 FeePrice fee = new FeePrice();
-                fee.setFirstPrice(new BigDecimal(c.getFirstPrice()));
+                fee.setFirstPrice(c.getFirstPrice());
                 if (c.getSecondPrice() != null) {
-                    fee.setNextPrice(new BigDecimal(c.getSecondPrice()));
+                    fee.setNextPrice(c.getSecondPrice());
                 }
                 feeConf.put(c.getFeeType() + c.getClassType(), fee);
             }

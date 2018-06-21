@@ -235,15 +235,12 @@ public class FeeServiceImpl implements FeeService {
         if (fee == null) {
             fee = SystemConfig.getFeeConfig().get(clientCode).get(prefix + "other");
         }
-        BigDecimal price = null;
-
-        BigDecimal storageBigDecimal = BigDecimal.valueOf(storage);
+        Double price = null;
         if (isNext) {
-            price = fee.getNextPrice().multiply(storageBigDecimal);
+            price = fee.getNextPrice() * storage;
         } else {
             // 配置信息中续件配置为0则表示不计算续件
-            BigDecimal nextStorage = BigDecimal.valueOf(storage - 1);
-            price = fee.getNextPrice() == null ? fee.getFirstPrice().multiply(storageBigDecimal) : fee.getFirstPrice().add(fee.getNextPrice().multiply(nextStorage));
+            price = fee.getNextPrice() == null ? fee.getFirstPrice() * storage : fee.getFirstPrice() + (fee.getNextPrice() * (storage - 1));
         }
         return price.doubleValue();
     }
@@ -254,7 +251,6 @@ public class FeeServiceImpl implements FeeService {
             h.setCategories("9999");
             fee = SystemConfig.getFeeConfig().get(clientCode).get(prefix + "other");
         }
-
         return fee.getNextPrice() == null ? "" + fee.getFirstPrice().doubleValue() : "" + fee.getFirstPrice().doubleValue() + "/" + fee.getNextPrice();
     }
 
