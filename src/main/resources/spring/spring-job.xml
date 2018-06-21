@@ -25,7 +25,7 @@
     <!-- 通知调度配置 begin  -->
     <bean id="inboundTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="inboundTriggerDetail"/>
-        <property name="cronExpression" value="0 10 0 ? * *"/>
+        <property name="cronExpression" value="0 10 12 ? * *"/>
     </bean>
 
     <bean id="inboundTriggerDetail"
@@ -39,7 +39,7 @@
     <!-- 通知调度配置 begin  -->
     <bean id="orderhandlerTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="orderhandlerTriggerDetail"/>
-        <property name="cronExpression" value="0 20 0 ? * *"/>
+        <property name="cronExpression" value="0 20 12 ? * *"/>
     </bean>
 
     <bean id="orderhandlerTriggerDetail"
@@ -54,7 +54,7 @@
     <!-- 通知调度配置 begin  -->
     <bean id="orderreturnTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="orderreturnTriggerDetail"/>
-        <property name="cronExpression" value="0 30 0 ? * *"/>
+        <property name="cronExpression" value="0 30 12 ? * *"/>
     </bean>
 
     <bean id="orderreturnTriggerDetail"
@@ -68,7 +68,7 @@
     <!-- 通知调度配置 begin  -->
     <bean id="returnmerchantTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="returnmerchantTriggerDetail"/>
-        <property name="cronExpression" value="0 40 0 ? * *"/>
+        <property name="cronExpression" value="0 40 12 ? * *"/>
     </bean>
 
     <bean id="returnmerchantTriggerDetail"
