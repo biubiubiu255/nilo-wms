@@ -92,16 +92,16 @@ function showEditModel(data) {
     });
 
     $("#editForm")[0].reset();
-    $("#editForm").attr("method", "POST");
     var selectItem = "";
     if (data != null) {
+        $("#editForm input[name=_method]").val('PUT');
+
         $("#editForm input[name=userId]").val(data.userId);
         $("#editForm input[name=username]").val(data.username);
         $("#editForm input[name=nickname]").val(data.nickname);
         $("#editForm input[name=phone]").val(data.phone);
         $("#editForm input[name=username]").attr("disabled", true);
         selectItem = data.roleId;
-        selectItemWarehouse = data.roleId;
         if ('M' == data.sex) {
             $("#sexMan").attr("checked", "checked");
             $("#sexWoman").removeAttr("checked");
@@ -141,30 +141,6 @@ function getRoles(selectItem) {
     }
 }
 
-
-//获取所有仓库
-var warehouseList = null;
-function drawWarehouseSelect(selectItem) {
-    if (warehouseList != null) {
-        $("#warehouse-select").empty();
-        $("#warehouse-select").prepend("<option value=''>" + getI18nAttr('pls_select') + "</option>");
-        for (var i = 0; i < warehouseList.length; i++) {
-            $("#warehouse-select").append("<option value='" + warehouseList[i].id + "'>" + warehouseList[i].name + "</option>");
-        }
-        $("#warehouse-select").val(selectItem);
-        layui.form.render('select');
-
-    } else {
-        var load = layer.load(2);
-        $.get("/servlet/warehouseList", {
-            token: getToken()
-        }, function (data) {
-            warehouseList = data.response;
-            drawWarehouseSelect(selectItem);
-            layer.close(load);
-        }, "JSON");
-    }
-}
 
 //删除
 function doDelete(obj) {
