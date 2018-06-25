@@ -217,7 +217,7 @@ public class FeeServiceImpl implements FeeService {
         map.put("type_id", "1");
         map.put("order_platform", clientCode);
         map.put("store_id", list.get(0).getStore_id());
-        map.put("charge_type", "1");
+        map.put("charge_type", "2");
         map.put("money_type", moneyType);
         String data = JSON.toJSONString(map);
         systemService.notifyDataBus(data, clientCode, "wms_fee");
