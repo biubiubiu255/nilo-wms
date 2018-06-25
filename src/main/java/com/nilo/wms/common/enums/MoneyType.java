@@ -8,15 +8,15 @@ import java.util.Map;
  */
 public enum MoneyType {
 
-    In_Bound("0", "收货上架"),
+    In_Bound("1", "收货上架"),
 
-    Order_Handler("1", "库内操作"),
+    Order_Handler("2", "库内操作"),
 
-    Storage("2", "库存"),
+    Storage("3", "库存"),
 
-    Order_Return("3", "退货"),
+    Order_Return("4", "退货"),
 
-    Return_Merchant("4", "返厂处理");
+    Return_Merchant("5", "返厂处理");
 
 
 
