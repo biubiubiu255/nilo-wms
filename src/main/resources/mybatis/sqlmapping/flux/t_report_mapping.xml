@@ -115,9 +115,6 @@
 
 	<select id="inventory_location" resultMap="inventoryLocation">
 
-		SELECT *
-		FROM (SELECT tt.*, ROWNUM AS rowno
-		FROM (
 		SELECT
 		a.sku as sku,
 		substr(b.descr_e,0,70) as sku_desc,
@@ -135,22 +132,17 @@
 		LEFT JOIN
 		BAS_LOCATION E ON E.LOCATIONID=A.LOCATIONID
 		WHERE
-		<![CDATA[
-    		D.LOTATT08 = 'N'
-    		AND E.PICKZONE <>'KE010301'
-    		AND A.LOCATIONID NOT IN ('STAGEKE01','SORTATIONKE01')	]]>
-		<if test="shelf !=null and shelf !='' ">
-			and a.LOCATIONID LIKE CONCAT( CONCAT('KE01-01-',#{shelf}),'%')
-		</if>
-		<if test="location !=null and location !='' ">
-			and a.LOCATIONID LIKE CONCAT( CONCAT('%',#{location}),'%')
-		</if>		group BY a.sku,b.descr_e,a.locationid, a.traceid
-		order by a.locationid
-		,a.traceid
 
-		) tt
-		WHERE <![CDATA[ROWNUM <= #{end} ]]>  ) table_alias
-		WHERE table_alias.rowno >= #{offset}
+    	D.LOTATT08 = 'N'
+    	AND A.LOCATIONID NOT IN ('STAGEKE01','SORTATIONKE01')
+		and a.LOCATIONID in
+		<foreach item="item" index="index" collection="locationList"
+				 open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		group BY a.sku,b.descr_e,a.locationid, a.traceid
+		order by a.locationid,a.traceid
+
 	</select>
 
 	<select id="inventory_location_count" resultType="java.lang.Integer">
@@ -167,16 +159,13 @@
 		LEFT JOIN
 		BAS_LOCATION E ON E.LOCATIONID=A.LOCATIONID
 		WHERE
-		<![CDATA[
-    		D.LOTATT08 = 'N'
-    		AND E.PICKZONE <>'KE010301'
-    		AND A.LOCATIONID NOT IN ('STAGEKE01','SORTATIONKE01')	]]>
-		<if test="shelf !=null and shelf !='' ">
-			and a.LOCATIONID LIKE CONCAT( CONCAT('KE01-01-',#{shelf}),'%')
-		</if>
-		<if test="location !=null and location !='' ">
-			and a.LOCATIONID LIKE CONCAT( CONCAT('%',#{location}),'%')
-		</if>
+    	D.LOTATT08 = 'N'
+    	AND A.LOCATIONID NOT IN ('STAGEKE01','SORTATIONKE01')
+		and a.LOCATIONID in
+		<foreach item="item" index="index" collection="locationList"
+				 open="(" separator="," close=")">
+			#{item}
+		</foreach>
 
 	</select>
 </mapper>

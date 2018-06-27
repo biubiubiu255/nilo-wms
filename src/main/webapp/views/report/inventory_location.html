@@ -4,16 +4,18 @@
 	  <a><cite><span i18n="report_daily_pick"></span> </cite></a>
 	</span>
     <div class="layui-form toolbar">
-
-        <span i18n="search"></span>：
-        <select id="searchKey">
-            <option value="" i18n="please_select"></option>
-            <option value="shelf" i18n="location_shelf"></option>
-            <option value="location" i18n="location"></option>
-        </select>
-
-        <input id="searchValue" class="layui-input search-input" type="text"/>&emsp;
-
+        <div class="layui-inline">
+            <div class="layui-inline">
+                <label class="layui-form-label">Location :</label>
+            </div>
+            <div class="layui-inline">
+                <input type="text" class="layui-input" id="fromLocation">
+            </div>
+            ~
+            <div class="layui-inline">
+                <input type="text" class="layui-input" id="toLocation">
+            </div>
+        </div>&emsp;
         <button id="searchBtn" class="layui-btn search-btn" permission="3004"><i class="layui-icon">&#xe615;</i><span
                 i18n="search"/></button>
         &emsp;
@@ -40,7 +42,7 @@
             where: {
                 token: getToken()
             },
-            page: true,
+            page: false,
             cols: [[
                 {type: 'numbers'},
                 {field: 'sku', sort: true, title: getI18nAttr('basic_sku')},
@@ -61,17 +63,21 @@
             doSearch(table);
         });
         function doSearch(table) {
-            var key = $("#searchKey").val();
-            var value = $("#searchValue").val();
-            if (value == '') {
-                key = '';
+            var fromLocation = $("#fromLocation").val();
+            var toLocation = $("#toLocation").val();
+            if (toLocation == '') {
+                toLocation = fromLocation;
+            }
+            if (fromLocation=='') {
+                layer.msg("pls input location");
+                return;
             }
             layer.load(2);
             layui.table.reload('table', {
                 where: {
-                searchKey: key,
-                searchValue: value
-            }
+                    fromLocation: fromLocation,
+                    toLocation: toLocation
+                }
             });
         }
 
@@ -80,13 +86,14 @@
         });
 
         function exportLocation(table) {
-            var key = $("#searchKey").val();
-            var value = $("#searchValue").val();
-            if (value == '') {
-                key = '';
+            var fromLocation = $("#fromLocation").val();
+            var toLocation = $("#toLocation").val();
+            if (toLocation == '') {
+                toLocation = fromLocation;
             }
-            if(!key){
-                layer.msg("pls input");
+            if (!fromLocation) {
+                layer.msg("pls input location");
+                return;
             }
             layer.confirm("Confirm Export", function (index) {
                 layer.close(index);
@@ -94,8 +101,8 @@
 
                 $.post("/servlet/report/inventory_location/build_excel", {
                     token: getToken(),
-                    searchKey: key,
-                    searchValue: value
+                    fromLocation: fromLocation,
+                    toLocation: toLocation
                 }, function (data) {
                     layer.closeAll('loading');
                     if (data.status == 'succ') {

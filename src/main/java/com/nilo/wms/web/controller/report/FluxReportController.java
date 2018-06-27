@@ -84,36 +84,34 @@ public class FluxReportController extends BaseController {
     @RequiresPermissions("3004")
     @GetMapping("/inventory_location")
     @ResponseBody
-    public String inventory_location(String searchKey, String searchValue) {
+    public String inventory_location(String fromLocation, String toLocation) {
 
         List<InventoryLocation> list = new ArrayList<>();
-        if (StringUtil.isEmpty(searchKey)) {
+        if (StringUtil.isEmpty(fromLocation) || StringUtil.isEmpty(toLocation)) {
             return toLayUIData(0, list);
         }
-        Map<String, String> param = new HashMap<>();
-        param.put(searchKey, searchValue);
-        Page page = getPage();
-        param.put("offset", "" + page.getOffset());
-        param.put("end", "" + page.getOffset() + page.getLimit());
-        Integer count = fluxReportDao.inventory_location_count(param);
-        list = fluxReportDao.inventory_location(param);
+
+        List<String> locationList = getLocationList(fromLocation, toLocation);
+        Integer count = fluxReportDao.inventory_location_count(locationList);
+        if (count != 0) {
+            list = fluxReportDao.inventory_location(locationList);
+        }
         return toLayUIData(count, list);
     }
 
     @RequiresPermissions("3004")
     @PostMapping("/inventory_location/build_excel")
     @ResponseBody
-    public String build_excel(String searchKey, String searchValue) {
+    public String build_excel(String fromLocation, String toLocation) {
 
         List<InventoryLocation> list = new ArrayList<>();
-
-        Map<String, String> param = new HashMap<>();
-        param.put(searchKey, searchValue);
-        Integer count = fluxReportDao.inventory_location_count(param);
+        if (StringUtil.isEmpty(fromLocation) || StringUtil.isEmpty(toLocation)) {
+            return ResultMap.error().toJson();
+        }
+        List<String> locationList = getLocationList(fromLocation, toLocation);
+        Integer count = fluxReportDao.inventory_location_count(locationList);
         if (count != 0) {
-            param.put("offset", "" + 0);
-            param.put("end", "" + count);
-            list = fluxReportDao.inventory_location(param);
+            list = fluxReportDao.inventory_location(locationList);
         }
 
         HSSFWorkbook wb = new HSSFWorkbook();
@@ -169,5 +167,43 @@ public class FluxReportController extends BaseController {
             }
         }
         return null;
+    }
+
+    private List<String> getLocationList(String locationFrom, String locationTo) {
+        List<String> locationList = new ArrayList<String>();
+
+        if (StringUtil.equalsIgnoreCase(locationFrom, locationTo)) {
+            locationList.add(locationFrom);
+            return locationList;
+        }
+
+        int from = Integer
+                .parseInt(locationFrom.substring(locationFrom.length() - 2, locationFrom.length()));
+        int to = Integer
+                .parseInt(locationTo.substring(locationTo.length() - 2, locationTo.length()));
+        int count = to - from;
+
+        //前缀
+        String prefix = locationTo.substring(0, 10);
+        for (int i = 0; i < count; i++) {
+
+            String temp = "0" + (from + i);
+            temp = temp.substring(temp.length() - 2, temp.length());
+            locationList.add(prefix + "-" + 1 + "-" + temp);
+            locationList.add(prefix + "-" + 2 + "-" + temp);
+            locationList.add(prefix + "-" + 3 + "-" + temp);
+            locationList.add(prefix + "-" + 4 + "-" + temp);
+        }
+
+        if (count == 0) {
+            String temp = "0" + from;
+            temp = temp.substring(temp.length() - 2, temp.length());
+            locationList.add(prefix + "-" + 1 + "-" + temp);
+            locationList.add(prefix + "-" + 2 + "-" + temp);
+            locationList.add(prefix + "-" + 3 + "-" + temp);
+            locationList.add(prefix + "-" + 4 + "-" + temp);
+        }
+
+        return locationList;
     }
 }

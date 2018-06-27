@@ -6,6 +6,7 @@ package com.nilo.wms.dao.flux;
 
 import com.nilo.wms.dto.flux.InventoryLocation;
 import com.nilo.wms.dto.flux.StaffWork;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -21,8 +22,8 @@ public interface FluxReportDao {
 
     List<StaffWork> daily_dispatch(Map<String, String> param);
 
-    List<InventoryLocation> inventory_location(Map<String, String> param);
+    List<InventoryLocation> inventory_location(@Param("locationList")List<String> locationList);
 
-    Integer inventory_location_count(Map<String, String> param);
+    Integer inventory_location_count(@Param("locationList") List<String> locationList);
 
 }
