@@ -136,7 +136,7 @@ public class BasicDataServiceImpl implements BasicDataService {
             AssertUtil.isNotBlank(supplierInfo.getCustomerId(), CheckErrorCode.STORE_EMPTY);
             AssertUtil.isNotBlank(supplierInfo.getDescE(), CheckErrorCode.STORE_DESC_EMPTY);
             AssertUtil.isNotBlank(supplierInfo.getType(), CheckErrorCode.STORE_TYPE_EMPTY);
-            AssertUtil.isNotBlank(supplierInfo.getAddress(), CheckErrorCode.STORE_ADDRESS_EMPTY);
+            //AssertUtil.isNotBlank(supplierInfo.getAddress(), CheckErrorCode.STORE_ADDRESS_EMPTY);
             AssertUtil.isTrue(StringUtil.equals(supplierInfo.getType(), "0") || StringUtil.equals(supplierInfo.getType(), "1"), CheckErrorCode.STORE_TYPE_NOT_EXIST);
 
         }
@@ -554,8 +554,8 @@ public class BasicDataServiceImpl implements BasicDataService {
         List<StorageInfo> notifyList = new ArrayList<>();
 
         for (String s : sku) {
-            int lockStoInt = getLockStorage(clientCode,s);
-            int stoInt = getCacheStorage(clientCode,s);
+            int lockStoInt = getLockStorage(clientCode, s);
+            int stoInt = getCacheStorage(clientCode, s);
             StorageInfo storageInfo = new StorageInfo();
             storageInfo.setSku(s);
             storageInfo.setCacheStorage(stoInt);
