@@ -32,7 +32,9 @@
         ON d.lotnum=a.lotnum
         LEFT JOIN VIEW_MULTIWAREHOUSE C
         ON A.LOCATIONID = C.LOCATIONID
+        LEFT JOIN BAS_LOCATION E ON E.LOCATIONID=A.LOCATIONID
         WHERE D.LOTATT08 = 'N'
+        and E.PICKZONE in ('KE010101','KE010102') AND A.LOCATIONID NOT IN ('STAGEKE01','SORTATIONKE01')
         <if test="param.customerId !=null and param.customerId !='' ">
             and a.customerid = #{param.customerId}
         </if>
@@ -68,7 +70,9 @@
         ON d.lotnum=a.lotnum
         LEFT JOIN VIEW_MULTIWAREHOUSE C
         ON A.LOCATIONID = C.LOCATIONID
+        LEFT JOIN BAS_LOCATION E ON E.LOCATIONID=A.LOCATIONID
         WHERE D.LOTATT08 = 'N'
+        and E.PICKZONE in ('KE010101','KE010102') AND A.LOCATIONID NOT IN ('STAGEKE01','SORTATIONKE01')
         <if test="param.customerId !=null and param.customerId !='' ">
             and a.customerid = #{param.customerId}
         </if>
