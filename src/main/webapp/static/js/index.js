@@ -43,8 +43,8 @@ $(function () {
         data.field.token = getToken();
         data.field._method = $("#pswForm").attr("method");
         layer.load(2);
-        $.post("api/user/psw", data.field, function (data) {
-            if (data.code == 200) {
+        $.post("/servlet/user/psw", data.field, function (data) {
+            if (data.status == 'succ') {
                 layer.msg(data.msg, {icon: 1});
                 setTimeout(function () {
                     loginOut();

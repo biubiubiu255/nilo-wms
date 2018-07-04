@@ -61,7 +61,7 @@ public class UserController extends BaseController {
 
     }
 
-    @PutMapping("/psw/{userId}")
+    @PutMapping("/psw")
     @RequiresPermissions("10015")
     public String psw(@PathVariable("userId") String userId) {
 

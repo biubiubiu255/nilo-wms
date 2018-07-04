@@ -87,14 +87,14 @@ public class ApiController extends BaseController {
                     break;
                 }
                 case SKU: {
-                    List<SkuInfo> list = new ArrayList<>();
+/*                    List<SkuInfo> list = new ArrayList<>();
                     if (data.startsWith("[")) {
                         list = JSONArray.parseArray(data, SkuInfo.class);
                     } else {
                         SkuInfo skuInfo = JSON.parseObject(data, SkuInfo.class);
                         list.add(skuInfo);
                     }
-                    basicDataService.updateSku(list);
+                    basicDataService.updateSku(list);*/
                     break;
                 }
                 case CUSTOMER: {

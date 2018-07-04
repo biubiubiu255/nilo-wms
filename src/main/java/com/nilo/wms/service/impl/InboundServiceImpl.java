@@ -8,14 +8,12 @@ import com.nilo.wms.common.exception.BizErrorCode;
 import com.nilo.wms.common.exception.CheckErrorCode;
 import com.nilo.wms.common.exception.SysErrorCode;
 import com.nilo.wms.common.exception.WMSException;
-import com.nilo.wms.common.util.AssertUtil;
-import com.nilo.wms.common.util.DateUtil;
-import com.nilo.wms.common.util.StringUtil;
-import com.nilo.wms.common.util.XmlUtil;
+import com.nilo.wms.common.util.*;
 import com.nilo.wms.dao.flux.FluxInboundDao;
 import com.nilo.wms.dao.flux.FluxInventoryDao;
 import com.nilo.wms.dao.platform.InboundDao;
 import com.nilo.wms.dao.platform.InboundDetailsDao;
+import com.nilo.wms.dto.SkuInfo;
 import com.nilo.wms.dto.StorageInfo;
 import com.nilo.wms.dto.common.PageResult;
 import com.nilo.wms.dto.flux.FLuxRequest;
@@ -65,8 +63,12 @@ public class InboundServiceImpl implements InboundService {
     private FluxInboundDao fluxInboundDao;
     @Autowired
     private SystemService systemService;
+
     @Value("#{configProperties['flux_status']}")
     private String flux_status;
+    @Value("#{configProperties['sku_url']}")
+    private String sku_url;
+
     @Override
     public void createInBound(InboundHeader inbound) {
 
@@ -92,6 +94,9 @@ public class InboundServiceImpl implements InboundService {
 
         Inbound inboundDO = inboundDao.queryByReferenceNo(clientCode, inbound.getReferenceNo());
         if (inboundDO != null) return;
+
+        //获取sku信息
+        updateSkuInfo(inbound.getItemList());
 
         //构建flux请求对象
         FLuxRequest request = new FLuxRequest();
@@ -125,6 +130,20 @@ public class InboundServiceImpl implements InboundService {
 
         //保存信息
         recordInbound(inbound);
+    }
+
+    private void updateSkuInfo(List<InboundItem> itemList) {
+        //下发sku资料
+        List<SkuInfo> list = new ArrayList<>();
+        for (InboundItem item : itemList) {
+            String skuInfoString = HttpUtil.get(sku_url + item.getSku());
+            SkuInfo skuInfo = JSON.parseObject(skuInfoString, SkuInfo.class);
+            skuInfo.setCustomerId("KILIMALL");
+            skuInfo.setSku(item.getSku());
+            skuInfo.setPrice("0");
+            list.add(skuInfo);
+        }
+        basicDataService.updateSku(list);
     }
 
     @Transactional
@@ -268,7 +287,7 @@ public class InboundServiceImpl implements InboundService {
 
         Principal principal = SessionLocal.getPrincipal();
 
-        if(StringUtil.equals("close",flux_status)){
+        if (StringUtil.equals("close", flux_status)) {
             Inbound i = inboundDao.queryByReferenceNo(principal.getClientCode(), referenceNo);
             if (i == null) {
                 throw new WMSException(BizErrorCode.CLIENT_ORDER_SN_NOT_EXIST);
