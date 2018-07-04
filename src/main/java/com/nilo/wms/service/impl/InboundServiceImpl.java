@@ -265,17 +265,16 @@ public class InboundServiceImpl implements InboundService {
         List<StorageInfo> storageList = skuDao.queryBy(param);
 
         //获取redis锁
-        Jedis jedis = RedisUtil.getResource();
         String requestId = UUID.randomUUID().toString();
-        RedisUtil.tryGetDistributedLock(jedis, RedisUtil.LOCK_KEY, requestId);
+        RedisUtil.tryGetDistributedLock(RedisUtil.LOCK_KEY, requestId);
         //更新库存
         for (StorageInfo i : storageList) {
             String key = RedisUtil.getSkuKey(clientCode, i.getSku());
             String lockSto = RedisUtil.hget(key, RedisUtil.LOCK_STORAGE);
             i.setLockStorage(lockSto == null ? 0 : Integer.parseInt(lockSto));
-            jedis.hset(key, RedisUtil.STORAGE, "" + i.getStorage());
+            RedisUtil.hset(key, RedisUtil.STORAGE, "" + i.getStorage());
         }
-        RedisUtil.releaseDistributedLock(jedis, RedisUtil.LOCK_KEY, requestId);
+        RedisUtil.releaseDistributedLock(RedisUtil.LOCK_KEY, requestId);
 
         basicDataService.storageChangeNotify(storageList);
     }

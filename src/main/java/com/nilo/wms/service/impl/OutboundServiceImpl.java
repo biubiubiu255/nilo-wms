@@ -199,14 +199,13 @@ public class OutboundServiceImpl implements OutboundService {
         List<OutboundDetail> itemList = outboundItemDao.queryByReferenceNo(principal.getClientCode(), orderNo);
         if (itemList != null) {
             //获取redis锁
-            Jedis jedis = RedisUtil.getResource();
             String requestId = UUID.randomUUID().toString();
-            RedisUtil.tryGetDistributedLock(jedis, RedisUtil.LOCK_KEY, requestId);
+            RedisUtil.tryGetDistributedLock( RedisUtil.LOCK_KEY, requestId);
             for (OutboundDetail item : itemList) {
                 String key = RedisUtil.getSkuKey(clientCode, item.getSku());
-                String sto = jedis.hget(key, RedisUtil.STORAGE);
+                String sto = RedisUtil.hget(key, RedisUtil.STORAGE);
                 int stoInt = sto == null ? 0 : Integer.parseInt(sto) + item.getQty();
-                jedis.hset(key, RedisUtil.STORAGE, "" + stoInt);
+                RedisUtil.hset(key, RedisUtil.STORAGE, "" + stoInt);
             }
         }
     }

@@ -243,12 +243,10 @@ public class BasicDataServiceImpl implements BasicDataService {
         }
 
         //获取redis锁
-        Jedis jedis = RedisUtil.getResource();
         String requestId = UUID.randomUUID().toString();
-        RedisUtil.tryGetDistributedLock(jedis, RedisUtil.LOCK_KEY, requestId);
+        RedisUtil.tryGetDistributedLock(RedisUtil.LOCK_KEY, requestId);
 
         List<StorageInfo> result = new ArrayList<>();
-
         Map<String, Integer> lockRecord = new HashMap<>();
         boolean lockSuccess = true;
         for (OutboundItem item : header.getItemList()) {
@@ -277,15 +275,15 @@ public class BasicDataServiceImpl implements BasicDataService {
 
 
         if (!lockSuccess) {
-            RedisUtil.releaseDistributedLock(jedis, RedisUtil.LOCK_KEY, requestId);
+            RedisUtil.releaseDistributedLock(RedisUtil.LOCK_KEY, requestId);
             return result;
         }
 
         for (Map.Entry<String, Integer> entry : lockRecord.entrySet()) {
-            jedis.hset(entry.getKey(), RedisUtil.LOCK_STORAGE, "" + entry.getValue());
+            RedisUtil.hset(entry.getKey(), RedisUtil.LOCK_STORAGE, "" + entry.getValue());
         }
 
-        RedisUtil.releaseDistributedLock(jedis, RedisUtil.LOCK_KEY, requestId);
+        RedisUtil.releaseDistributedLock(RedisUtil.LOCK_KEY, requestId);
 
         //锁定成功，添加订单到锁定列表
         for (OutboundItem item : header.getItemList()) {
@@ -313,20 +311,19 @@ public class BasicDataServiceImpl implements BasicDataService {
         }
 
         //获取redis锁
-        Jedis jedis = RedisUtil.getResource();
         String requestId = UUID.randomUUID().toString();
-        RedisUtil.tryGetDistributedLock(jedis, RedisUtil.LOCK_KEY, requestId);
+        RedisUtil.tryGetDistributedLock(RedisUtil.LOCK_KEY, requestId);
         // 查询锁定列表
-        Set<String> skuList = jedis.hkeys(orderNoKey);
+        Set<String> skuList = RedisUtil.hkeys(orderNoKey);
         skuList.remove(RedisUtil.LOCK_TIME);
         for (String sku : skuList) {
-            int qty = Integer.parseInt(jedis.hget(orderNoKey, sku));
+            int qty = Integer.parseInt(RedisUtil.hget(orderNoKey, sku));
             String key = RedisUtil.getSkuKey(clientCode, sku);
             int afterLockStorage = getLockStorage(clientCode, sku) - qty;
-            jedis.hset(key, RedisUtil.LOCK_STORAGE, "" + afterLockStorage);
+            RedisUtil.hset(key, RedisUtil.LOCK_STORAGE, "" + afterLockStorage);
         }
 
-        RedisUtil.releaseDistributedLock(jedis, RedisUtil.LOCK_KEY, requestId);
+        RedisUtil.releaseDistributedLock(RedisUtil.LOCK_KEY, requestId);
 
         RedisUtil.del(orderNoKey);
 
@@ -341,28 +338,27 @@ public class BasicDataServiceImpl implements BasicDataService {
         List<StorageInfo> lessThanSafe = new ArrayList<>();
 
         //获取redis锁
-        Jedis jedis = RedisUtil.getResource();
         String requestId = UUID.randomUUID().toString();
-        RedisUtil.tryGetDistributedLock(jedis, RedisUtil.LOCK_KEY, requestId);
+        RedisUtil.tryGetDistributedLock(RedisUtil.LOCK_KEY, requestId);
 
 
         String orderNoKey = RedisUtil.getLockOrderKey(clientCode, header.getOrderNo());
         // 查询锁定列表
-        Set<String> skuList = jedis.hkeys(orderNoKey);
+        Set<String> skuList = RedisUtil.hkeys(orderNoKey);
         skuList.remove(RedisUtil.LOCK_TIME);
         for (String sku : skuList) {
-            int qty = Integer.parseInt(jedis.hget(orderNoKey, sku));
+            int qty = Integer.parseInt(RedisUtil.hget(orderNoKey, sku));
             //扣减锁定库存
             String key = RedisUtil.getSkuKey(clientCode, sku);
             int afterLockStorage = getLockStorage(clientCode, sku) - qty;
-            jedis.hset(key, RedisUtil.LOCK_STORAGE, "" + afterLockStorage);
+            RedisUtil.hset(key, RedisUtil.LOCK_STORAGE, "" + afterLockStorage);
             //扣减库存
             int stoInt = getCacheStorage(clientCode, sku) - qty;
-            jedis.hset(key, RedisUtil.STORAGE, "" + stoInt);
+            RedisUtil.hset(key, RedisUtil.STORAGE, "" + stoInt);
             //库存少于安全库存 发送通知
             int safeInt = getSafeStorage(clientCode, sku);
             if (stoInt < safeInt) {
-                String storeId = jedis.hget(key, RedisUtil.STORE);
+                String storeId = RedisUtil.hget(key, RedisUtil.STORE);
                 StorageInfo info = new StorageInfo();
                 info.setSku(sku);
                 info.setStoreId(storeId);
@@ -372,7 +368,7 @@ public class BasicDataServiceImpl implements BasicDataService {
             }
         }
         RedisUtil.del(orderNoKey);
-        RedisUtil.releaseDistributedLock(jedis, RedisUtil.LOCK_KEY, requestId);
+        RedisUtil.releaseDistributedLock(RedisUtil.LOCK_KEY, requestId);
         if (lessThanSafe.size() == 0) {
             return;
         }
@@ -444,15 +440,14 @@ public class BasicDataServiceImpl implements BasicDataService {
         Set<String> cacheSkuKeyList = RedisUtil.keys(RedisUtil.getSkuKey(clientCode, "*"));
 
         //获取redis锁
-        Jedis jedis = RedisUtil.getResource();
         String requestId = UUID.randomUUID().toString();
-        RedisUtil.tryGetDistributedLock(jedis, RedisUtil.LOCK_KEY, requestId);
+        RedisUtil.tryGetDistributedLock(RedisUtil.LOCK_KEY, requestId);
 
         //构建wms-cache差异数据
         List<StorageInfo> diffList = new ArrayList<>();
         for (StorageInfo s : list) {
             String key = RedisUtil.getSkuKey(clientCode, s.getSku());
-            String storage = jedis.hget(key, RedisUtil.STORAGE);
+            String storage = RedisUtil.hget(key, RedisUtil.STORAGE);
             if (!StringUtil.equals(storage, "" + s.getStorage())) {
                 s.setLockStorage(getLockStorage(clientCode, s.getSku()));
                 diffList.add(s);
@@ -468,19 +463,19 @@ public class BasicDataServiceImpl implements BasicDataService {
         for (String key : cacheSkuKeyList) {
             String[] temp = key.split("_sku_");
             if (!wmsSkuList.containsKey(temp[1])) {
-                jedis.del(key);
+                RedisUtil.del(key);
             }
         }
 
         for (StorageInfo s : diffList) {
             String key = RedisUtil.getSkuKey(clientCode, s.getSku());
-            jedis.hset(key, RedisUtil.STORAGE, "" + s.getStorage());
-            jedis.hset(key, RedisUtil.LOCK_STORAGE, "" + s.getLockStorage());
-            jedis.hset(key, RedisUtil.STORE, s.getStoreId());
-            jedis.hset(key, RedisUtil.SAFE_STORAGE, "" + s.getSafeStorage());
+            RedisUtil.hset(key, RedisUtil.STORAGE, "" + s.getStorage());
+            RedisUtil.hset(key, RedisUtil.LOCK_STORAGE, "" + s.getLockStorage());
+            RedisUtil.hset(key, RedisUtil.STORE, s.getStoreId());
+            RedisUtil.hset(key, RedisUtil.SAFE_STORAGE, "" + s.getSafeStorage());
         }
 
-        RedisUtil.releaseDistributedLock(jedis, RedisUtil.LOCK_KEY, requestId);
+        RedisUtil.releaseDistributedLock(RedisUtil.LOCK_KEY, requestId);
 
         //同步所有sku库存
         cacheSkuKeyList = RedisUtil.keys(RedisUtil.getSkuKey(clientCode, "*"));
@@ -490,7 +485,7 @@ public class BasicDataServiceImpl implements BasicDataService {
             StorageInfo s = new StorageInfo();
             String[] temp = key.split("_sku_");
             s.setSku(temp[1]);
-            s.setStorage(Integer.parseInt(jedis.hget(key, RedisUtil.STORAGE)));
+            s.setStorage(Integer.parseInt(RedisUtil.hget(key, RedisUtil.STORAGE)));
             s.setLockStorage(getLockStorage(clientCode, temp[1]));
             notifyList.add(s);
         }

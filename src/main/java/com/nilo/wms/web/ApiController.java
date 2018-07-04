@@ -172,4 +172,10 @@ public class ApiController extends BaseController {
         apiLogDao.insert(log);
     }
 
+    public static void main(String[] args) {
+
+
+
+    }
+
 }
