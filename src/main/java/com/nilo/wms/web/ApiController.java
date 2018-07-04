@@ -153,7 +153,7 @@ public class ApiController extends BaseController {
             return ResultMap.error(e.getMessage()).put("response", response).toJson();
         } finally {
             //清除request_id
-            RedisUtil.del(param.getRequest_id());
+            //RedisUtil.del(param.getRequest_id());
         }
         addApiLog(param, "SUCCESS", true);
         return ResultMap.success().put("response", response).toJson();

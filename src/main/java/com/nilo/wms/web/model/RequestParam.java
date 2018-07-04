@@ -119,12 +119,12 @@ public class RequestParam {
         AssertUtil.isTrue(check, BizErrorCode.SIGN_ERROR);
 
         //校验request_id是否已经存在
-        String value = RedisUtil.get(request_id);
+/*        String value = RedisUtil.get(request_id);
         if(StringUtil.isNotEmpty(value)){
             throw new IllegalStateException("request already exist");
         }
 
-        RedisUtil.set(request_id,"1",5);
+        RedisUtil.set(request_id,"1",5);*/
 
         //设置调用api主体信息
         Principal principal = new Principal();
