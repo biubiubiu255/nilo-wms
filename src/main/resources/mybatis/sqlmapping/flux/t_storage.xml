@@ -56,6 +56,7 @@
             </foreach>
         </if>
         group by B.SKU_GROUP7,a.sku,b.ReservedField03
+        having SUM(A.QTY - A.QTYALLOCATED - A.QTYONHOLD - A.QTYMVIN - A.QTYMVOUT) > 0
         order by SUM(A.QTY - A.QTYALLOCATED - A.QTYONHOLD - A.QTYMVIN - A.QTYMVOUT) desc ) tt
         WHERE <![CDATA[ROWNUM <= #{param.end} ]]>  ) table_alias
         WHERE table_alias.rowno >= #{param.offset}
