@@ -3,6 +3,7 @@ package com.nilo.wms.web.controller.system;
 import com.nilo.wms.common.annotation.RequiresPermissions;
 import com.nilo.wms.common.util.BeanUtils;
 import com.nilo.wms.common.util.StringUtil;
+import com.nilo.wms.dto.common.Page;
 import com.nilo.wms.dto.common.ResultMap;
 import com.nilo.wms.dto.platform.parameter.PermissionParam;
 import com.nilo.wms.dto.platform.system.Permission;

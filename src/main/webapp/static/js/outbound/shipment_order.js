@@ -20,7 +20,6 @@ $(function () {
         where: {
             token: getToken(),
             dateRange: initDateRange
-
         },
         page: true,
         cols: [[

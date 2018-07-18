@@ -30,6 +30,7 @@ import com.nilo.wms.dto.platform.parameter.InboundParam;
 import com.nilo.wms.dto.platform.parameter.StorageParam;
 import com.nilo.wms.dto.platform.system.Permission;
 import com.nilo.wms.service.BasicDataService;
+import com.nilo.wms.service.FeeService;
 import com.nilo.wms.service.HttpRequest;
 import com.nilo.wms.service.InboundService;
 import com.nilo.wms.service.platform.RedisUtil;
@@ -71,7 +72,6 @@ public class InboundServiceImpl implements InboundService {
 
     @Override
     public void createInBound(InboundHeader inbound) {
-
         AssertUtil.isNotNull(inbound, SysErrorCode.REQUEST_IS_NULL);
         AssertUtil.isNotBlank(inbound.getReferenceNo(), CheckErrorCode.CLIENT_ORDER_EMPTY);
         AssertUtil.isNotBlank(inbound.getAsnType(), CheckErrorCode.ORDER_TYPE_EMPTY);

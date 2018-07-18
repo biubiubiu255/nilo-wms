@@ -144,7 +144,8 @@ function getParents(selectItem, type) {
         layui.form.render('select');
     } else {
         $.get("/servlet/permission/parent/" + type, {
-            token: getToken()
+            token: getToken(),
+            offset: 0, limit: 100
         }, function (data) {
             if (type == 1) {
                 parents1 = data.data;

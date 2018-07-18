@@ -22,6 +22,7 @@ public enum BizErrorCode implements ErrorCode {
     CLIENT_ORDER_SN_NOT_EXIST("client_ordersn not exist", "200015"),
     SKU_NOT_EXIST("sku not exist", "200016"),
     SKU_EXIST("sku exist", "200017"),
+    TIME_PARAM_NOT_EXIST("time params is null", "200018")
     ;
 
     private final String description;

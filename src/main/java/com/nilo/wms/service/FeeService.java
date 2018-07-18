@@ -9,6 +9,8 @@ import java.util.List;
  */
 public interface FeeService {
 
+    Integer STATUS =1;
+
     List<Fee> queryStorageFee(String clientCode,String date);
 
     List<Fee> queryInboundOrder(String clientCode,String date);

@@ -13,14 +13,18 @@ import com.nilo.wms.common.util.DateUtil;
 import com.nilo.wms.common.util.StringUtil;
 import com.nilo.wms.common.util.XmlUtil;
 import com.nilo.wms.dao.flux.FluxOutboundDao;
+import com.nilo.wms.dao.flux.WMSOutboundDetailDao;
 import com.nilo.wms.dao.platform.OutboundDao;
 import com.nilo.wms.dao.platform.OutboundItemDao;
 import com.nilo.wms.dto.StorageInfo;
+import com.nilo.wms.dto.common.Page;
 import com.nilo.wms.dto.common.PageResult;
 import com.nilo.wms.dto.flux.FLuxRequest;
 import com.nilo.wms.dto.flux.FluxOutbound;
 import com.nilo.wms.dto.flux.FluxResponse;
 import com.nilo.wms.dto.flux.FluxWeight;
+import com.nilo.wms.dto.inbound.OutboundDetailParam;
+import com.nilo.wms.dto.inbound.ReportOutboundDetail;
 import com.nilo.wms.dto.outbound.OutboundHeader;
 import com.nilo.wms.dto.outbound.OutboundItem;
 import com.nilo.wms.dto.platform.inbound.Inbound;
@@ -63,6 +67,8 @@ public class OutboundServiceImpl implements OutboundService {
     private BasicDataService basicDataService;
     @Value("#{configProperties['flux_status']}")
     private String flux_status;
+    @Autowired
+    private WMSOutboundDetailDao wmsOutboundDetailDao;
 
     @Override
     public void createOutBound(OutboundHeader outBound) {
@@ -369,6 +375,15 @@ public class OutboundServiceImpl implements OutboundService {
         List<Outbound> list = outboundDao.queryBy(param);
         pageResult.setData(list);
         return pageResult;
+    }
+
+    @Override
+    public List<ReportOutboundDetail> findOutboundDetail(OutboundDetailParam param, Page page) {
+        if(param.getFromDate()==null || param.getToDate()==null){
+            throw new WMSException(BizErrorCode.TIME_PARAM_NOT_EXIST);
+        }
+        page.setCount(wmsOutboundDetailDao.queryOutboundDetailCount(param));
+        return wmsOutboundDetailDao.queryOutboundDetail(param, page);
     }
 
 
