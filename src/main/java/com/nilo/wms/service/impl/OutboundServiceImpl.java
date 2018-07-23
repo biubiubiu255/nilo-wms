@@ -165,7 +165,7 @@ public class OutboundServiceImpl implements OutboundService {
         Principal principal = SessionLocal.getPrincipal();
         String clientCode = principal.getClientCode();
         Outbound outboundDO = outboundDao.queryByReferenceNo(clientCode, orderNo);
-        if (outboundDO == null) throw new WMSException(BizErrorCode.NOT_EXIST, orderNo);
+        if (outboundDO == null) return;
         if (outboundDO.getStatus() == OutBoundStatusEnum.cancelled.getCode()) return;
 
         OutBoundSimpleBean cancelOrder = new OutBoundSimpleBean();
@@ -200,7 +200,7 @@ public class OutboundServiceImpl implements OutboundService {
         if (itemList != null) {
             //获取redis锁
             String requestId = UUID.randomUUID().toString();
-            RedisUtil.tryGetDistributedLock( RedisUtil.LOCK_KEY, requestId);
+            RedisUtil.tryGetDistributedLock(RedisUtil.LOCK_KEY, requestId);
             for (OutboundDetail item : itemList) {
                 String key = RedisUtil.getSkuKey(clientCode, item.getSku());
                 String sto = RedisUtil.hget(key, RedisUtil.STORAGE);
@@ -300,7 +300,7 @@ public class OutboundServiceImpl implements OutboundService {
 
         if (StringUtil.equals(flux_status, "close")) {
 
-            Outbound outbound = outboundDao.queryByReferenceNo(principal.getClientCode(),orderNo);
+            Outbound outbound = outboundDao.queryByReferenceNo(principal.getClientCode(), orderNo);
             if (outbound == null) throw new WMSException(BizErrorCode.CLIENT_ORDER_SN_NOT_EXIST);
             FluxOutbound order = new FluxOutbound();
             order.setStatus(outbound.getStatus());
