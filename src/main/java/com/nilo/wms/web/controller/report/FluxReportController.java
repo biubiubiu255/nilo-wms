@@ -121,6 +121,7 @@ public class FluxReportController extends BaseController {
         String path = System.getProperty("user.home") + File.separator + "temp" + File.separator;
         String fileName = IdWorker.getInstance().nextId() + "";
         exportExcel.export(path, fileName + ".xls");
+
         return ResultMap.success().put("fileName", fileName).toJson();
     }
 

@@ -1,7 +1,10 @@
 package com.nilo.wms.service;
 
+import com.nilo.wms.dto.common.Page;
 import com.nilo.wms.dto.common.PageResult;
 import com.nilo.wms.dto.flux.FluxOutbound;
+import com.nilo.wms.dto.inbound.OutboundDetailParam;
+import com.nilo.wms.dto.inbound.ReportOutboundDetail;
 import com.nilo.wms.dto.outbound.OutboundHeader;
 import com.nilo.wms.dto.platform.outbound.Outbound;
 import com.nilo.wms.dto.platform.parameter.OutboundParam;
@@ -28,4 +31,6 @@ public interface OutboundService {
     void cancel(String referenceNo);
 
     PageResult<Outbound> queryBy(OutboundParam param);
+
+    List<ReportOutboundDetail> findOutboundDetail(OutboundDetailParam param, Page page);
 }

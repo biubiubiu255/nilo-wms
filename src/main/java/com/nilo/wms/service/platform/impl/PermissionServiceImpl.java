@@ -125,6 +125,8 @@ public class PermissionServiceImpl implements PermissionService {
         permission.setStatus(1);
         permissionDao.insert(permission);
 
+
+
     }
 
     @Override

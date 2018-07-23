@@ -6,6 +6,7 @@ import org.apache.poi.hssf.usermodel.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -151,4 +152,13 @@ public class ExportExcel<T> {
             }
         }
     }
+
+    public void exportWrite(OutputStream outputStream) {
+        try {
+            wb.write(outputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

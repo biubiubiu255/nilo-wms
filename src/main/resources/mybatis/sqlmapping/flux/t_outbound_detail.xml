@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nilo.wms.dao.flux.WMSOutboundDetailDao">
+
+    <!-- 实体bean与数据字段对应关系 -->
+    <resultMap id="OutboundDO" type="com.nilo.wms.dto.inbound.ReportOutboundDetail">
+        <result property="omsOrder" column="oms_order" jdbcType="VARCHAR"/>
+        <result property="orderIssueTime" column="order_issue_time" jdbcType="VARCHAR"/>
+        <result property="orderCheckTime" column="order_check_time" jdbcType="VARCHAR"/>
+        <result property="orderPickingTime" column="order_picking_time" jdbcType="VARCHAR"/>
+        <result property="orderLoadingTime" column="order_loading_time" jdbcType="VARCHAR"/>
+        <result property="wmsStatus" column="wms_status" jdbcType="VARCHAR"/>
+    </resultMap>
+
+
+    <select id="queryOutboundDetail" resultMap="OutboundDO" statementType="PREPARED">
+
+
+
+        SELECT
+        b.*
+        FROM
+        (
+        SELECT
+        ROWNUM AS rn,
+        A .*
+        FROM
+        (
+        SELECT
+        T .soreference1 oms_order,
+        TO_CHAR (
+        T .addtime,
+        'yyyy-MM-dd hh:mm'
+        ) order_issue_time,
+        TO_CHAR (
+        MAX (D .pickedtime),
+        'yyyy-MM-dd hh:mm'
+        ) order_picking_time,
+        TO_CHAR (
+        MAX (D .checktime),
+        'yyyy-MM-dd hh:mm'
+        ) order_check_time,
+        TO_CHAR (
+        MAX (D .shipmenttime),
+        'yyyy-MM-dd hh:mm'
+        ) order_loading_time,
+        DECODE (
+        T .sostatus,
+        '00',
+        '创建订单',
+        '30',
+        '部分分配',
+        '40',
+        '分配完成',
+        '50',
+        '部分捡货',
+        '60',
+        '捡货完成',
+        '62',
+        '部分装箱',
+        '63',
+        '完全装箱',
+        '65',
+        '部分装车',
+        '66',
+        '装车完成',
+        '70',
+        '部分发运',
+        '80',
+        '完全发运',
+        '90',
+        '订单取消',
+        '99',
+        '订单完成'
+        ) wms_status
+        FROM
+        act_allocation_details D
+        RIGHT JOIN doc_order_header T ON D .orderno = T .orderno
+        LEFT JOIN doc_loading_details l ON T .orderno = l.orderno
+        LEFT JOIN doc_loading_header H ON l.ldlno = H .ldlno
+        LEFT JOIN t_order_info o ON o.orderno = T .soreference1
+        WHERE
+        TO_CHAR (T .addtime, 'YYYY-MM-DD') BETWEEN #{param.fromDate}
+        AND #{param.toDate}
+        <if test="param.omsOrder != null and param.omsOrder != ''">
+            AND T .soreference1 = #{param.omsOrder}
+        </if>
+        GROUP BY
+        T .orderno,
+        T .soreference1,
+        T .userdefine1,
+        T .addtime,
+        T .sostatus,
+        D .pickedtime,
+        D .checktime,
+        D .shipmenttime,
+        T .channel,
+        H .carrierid,
+        H .driver,
+        H .loadingtotime,
+        o.status,
+        o.edittime
+        ORDER BY
+        T .addtime
+        ) A
+        WHERE
+        ROWNUM <![CDATA[ <= ]]> #{page.limit}
+        ) b
+        WHERE
+        b.rn > #{page.offset}
+    </select>
+
+    <select id="queryOutboundDetailCount" resultType="java.lang.Integer" statementType="PREPARED">
+        SELECT
+          count( 1)
+        FROM
+         doc_order_header
+         where  to_char(addtime,'YYYY-MM-DD') between #{param.fromDate} and #{param.toDate}
+        <if test="param.omsOrder != null and param.omsOrder != ''">
+            AND soreference1 = #{param.omsOrder}
+        </if>
+    </select>
+
+</mapper>
