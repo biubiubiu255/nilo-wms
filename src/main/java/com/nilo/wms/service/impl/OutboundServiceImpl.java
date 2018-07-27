@@ -12,6 +12,7 @@ import com.nilo.wms.common.util.AssertUtil;
 import com.nilo.wms.common.util.DateUtil;
 import com.nilo.wms.common.util.StringUtil;
 import com.nilo.wms.common.util.XmlUtil;
+import com.nilo.wms.dao.flux.FluxInventoryDao;
 import com.nilo.wms.dao.flux.FluxOutboundDao;
 import com.nilo.wms.dao.flux.WMSOutboundDetailDao;
 import com.nilo.wms.dao.platform.OutboundDao;
@@ -31,6 +32,7 @@ import com.nilo.wms.dto.platform.inbound.Inbound;
 import com.nilo.wms.dto.platform.outbound.Outbound;
 import com.nilo.wms.dto.platform.outbound.OutboundDetail;
 import com.nilo.wms.dto.platform.parameter.OutboundParam;
+import com.nilo.wms.dto.platform.parameter.StorageParam;
 import com.nilo.wms.service.BasicDataService;
 import com.nilo.wms.service.HttpRequest;
 import com.nilo.wms.service.OutboundService;
@@ -69,7 +71,8 @@ public class OutboundServiceImpl implements OutboundService {
     private String flux_status;
     @Autowired
     private WMSOutboundDetailDao wmsOutboundDetailDao;
-
+    @Autowired
+    private FluxInventoryDao fluxInventoryDao;
     @Override
     public void createOutBound(OutboundHeader outBound) {
 
@@ -204,15 +207,26 @@ public class OutboundServiceImpl implements OutboundService {
         // 增加库存
         List<OutboundDetail> itemList = outboundItemDao.queryByReferenceNo(principal.getClientCode(), orderNo);
         if (itemList != null) {
+            List<String> skuList = new ArrayList<>();
+            for (OutboundDetail item : itemList) {
+                skuList.add(item.getSku());
+            }
+            // 查询sku 仓库实际库存
+            StorageParam param = new StorageParam();
+            param.setSku(skuList);
+            param.setPage(1);
+            param.setLimit(100);
+            param.setWarehouseId(SessionLocal.getPrincipal().getWarehouseId());
+            param.setCustomerId(SessionLocal.getPrincipal().getCustomerId());
+            List<StorageInfo> storageList = fluxInventoryDao.queryBy(param);
             //获取redis锁
             String requestId = UUID.randomUUID().toString();
             RedisUtil.tryGetDistributedLock(RedisUtil.LOCK_KEY, requestId);
-            for (OutboundDetail item : itemList) {
-                String key = RedisUtil.getSkuKey(clientCode, item.getSku());
-                String sto = RedisUtil.hget(key, RedisUtil.STORAGE);
-                int stoInt = sto == null ? 0 : Integer.parseInt(sto) + item.getQty();
-                RedisUtil.hset(key, RedisUtil.STORAGE, "" + stoInt);
+            for (StorageInfo s : storageList) {
+                String key = RedisUtil.getSkuKey(clientCode, s.getSku());
+                RedisUtil.hset(key, RedisUtil.STORAGE, "" + s.getStorage());
             }
+            RedisUtil.releaseDistributedLock(RedisUtil.LOCK_KEY, requestId);
         }
     }
 
