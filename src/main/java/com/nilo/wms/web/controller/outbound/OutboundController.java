@@ -6,25 +6,17 @@ import com.nilo.wms.common.annotation.RequiresPermissions;
 import com.nilo.wms.common.util.*;
 import com.nilo.wms.dto.common.Page;
 import com.nilo.wms.dto.common.ResultMap;
-import com.nilo.wms.dto.flux.InventoryLocation;
-import com.nilo.wms.dto.inbound.OutboundDetailParam;
-import com.nilo.wms.dto.inbound.ReportOutboundDetail;
-import com.nilo.wms.dto.platform.parameter.InboundParam;
+import com.nilo.wms.dto.outbound.OutboundDetailParam;
+import com.nilo.wms.dto.outbound.ReportOutboundDetail;
 import com.nilo.wms.dto.platform.parameter.OutboundParam;
-import com.nilo.wms.dto.platform.parameter.UserParam;
-import com.nilo.wms.dto.platform.system.User;
 import com.nilo.wms.service.OutboundService;
-import com.nilo.wms.service.platform.UserService;
 import com.nilo.wms.web.BaseController;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.http.HttpResponse;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
@@ -98,10 +90,6 @@ public class OutboundController extends BaseController {
         response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xls");
         ServletOutputStream outputStream = response.getOutputStream();
         exportExcel.exportWrite(outputStream);
-
-
-
-
         return null;
     }
 

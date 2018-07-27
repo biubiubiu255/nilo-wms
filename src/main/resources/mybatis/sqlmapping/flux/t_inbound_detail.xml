@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nilo.wms.dao.flux.WMSInboundDetailDao">
+
+    <!-- 实体bean与数据字段对应关系 -->
+    <resultMap id="InBoundDO" type="com.nilo.wms.dto.inbound.ReportInboundDetail">
+        <result property="orderNo" column="order_no" jdbcType="VARCHAR"/>
+        <result property="inboundType" column="inbound_type" jdbcType="VARCHAR"/>
+        <result property="inboundTime" column="inbound_time" jdbcType="VARCHAR"/>
+        <result property="receivedTime" column="receivedtime" jdbcType="VARCHAR"/>
+        <result property="putawayTime" column="putaway_time" jdbcType="VARCHAR"/>
+
+
+        <result property="inboundStatus" column="inbound_status" jdbcType="INTEGER"/>
+        <result property="linestatus" column="linestatus" jdbcType="INTEGER"/>
+        <result property="sku" column="sku" jdbcType="INTEGER"/>
+        <result property="expectedQty" column="expectedqty" jdbcType="INTEGER"/>
+        <result property="receivedQty" column="receivedqty" jdbcType="INTEGER"/>
+        <result property="putawaySku" column="putaway_sku" jdbcType="INTEGER"/>
+        <result property="putawayQty" column="putaway_qty" jdbcType="INTEGER"/>
+
+    </resultMap>
+
+
+    <select id="queryInboundDetail" resultMap="InBoundDO" statementType="PREPARED">
+
+        SELECT * FROM (
+            SELECT
+            ROWNUM rn,
+            A .ASNREFERENCE1 order_no,
+            A .ASNSTATUS inbound_status,
+            A .ASNTYPE inbound_type,
+            A .ADDTIME inbound_time,
+            b.linestatus,
+            b.sku,
+            b.expectedqty,
+            b.receivedtime,
+            b.receivedqty,
+            c.fmsku putaway_sku,
+            c.fmqty putaway_qty,
+            c.addtime putaway_time
+            FROM
+            doc_asn_header A
+            INNER JOIN DOC_ASN_DETAILS b ON A .ASNNO = b.ASNNO
+            <if test="param.orderNo!=null and param.orderNo!=''">AND A.ASNREFERENCE1 = #{param.orderNo} </if>
+            <if test="param.fromDate!=null and param.fromDate!=''">
+                AND TO_CHAR (A.addtime, 'YYYY-MM-DD') BETWEEN #{param.fromDate}
+                AND #{param.toDate}
+            </if>
+            INNER JOIN ACT_Transaction_Log c ON c.docno = A .ASNNO AND b.sku = c.fmsku
+            AND c.transactionType = 'PA'
+            WHERE ROWNUM <![CDATA[ <= ]]> #{page.limit}
+        ) d
+        WHERE d.rn > #{page.offset}
+
+    </select>
+
+    <select id="queryInboundDetailCount" resultType="java.lang.Integer" statementType="PREPARED">
+
+        SELECT
+        COUNT(1)
+        FROM
+        doc_asn_header A
+        INNER JOIN DOC_ASN_DETAILS b ON A .ASNNO = b.ASNNO
+        <if test="param.orderNo!=null and param.orderNo!=''">AND A.ASNREFERENCE1 = #{param.orderNo} </if>
+        <if test="param.fromDate!=null and param.fromDate!=''">
+            AND TO_CHAR (A.addtime, 'YYYY-MM-DD') BETWEEN #{param.fromDate}
+            AND #{param.toDate}
+        </if>
+        INNER JOIN ACT_Transaction_Log c ON c.docno = A .ASNNO AND b.sku = c.fmsku
+        AND c.transactionType = 'PA'
+
+    </select>
+
+</mapper>

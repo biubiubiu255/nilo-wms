@@ -4,7 +4,7 @@
 <mapper namespace="com.nilo.wms.dao.flux.WMSOutboundDetailDao">
 
     <!-- 实体bean与数据字段对应关系 -->
-    <resultMap id="OutboundDO" type="com.nilo.wms.dto.inbound.ReportOutboundDetail">
+    <resultMap id="OutboundDO" type="com.nilo.wms.dto.outbound.ReportOutboundDetail">
         <result property="omsOrder" column="oms_order" jdbcType="VARCHAR"/>
         <result property="orderIssueTime" column="order_issue_time" jdbcType="VARCHAR"/>
         <result property="orderCheckTime" column="order_check_time" jdbcType="VARCHAR"/>

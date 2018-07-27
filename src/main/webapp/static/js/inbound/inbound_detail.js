@@ -18,7 +18,7 @@ $(function () {
     //渲染表格
     layui.table.render({
         elem: '#table',
-        url: '/servlet/outbound/detail',
+        url: '/servlet/inbound/detail',
         method: 'POST',
         where: {
             token: getToken(),
@@ -28,12 +28,25 @@ $(function () {
         page: true,
         cols: [[
             {type: 'numbers'},
-            {field: 'omsOrder', sort: true, title: getI18nAttr('oms_order')},
-            {field: 'orderCheckTime', sort: true, title: getI18nAttr('order_check_time')},
-            {field: 'orderIssueTime', sort: true, title: getI18nAttr('order_issue_time')},
-            {field: 'orderPickingTime', sort: true, title: getI18nAttr('order_picking_time')},
-            {field: 'orderLoadingTime', sort: true, title: getI18nAttr('order_loading_time')},
-            {field: 'wmsStatus', sort: true, title: getI18nAttr('status')}
+            {field: 'orderNo', sort: true, width:200, title: getI18nAttr('waybill')},
+            {field: 'inboundType', sort: true,width:130, title: getI18nAttr('inbound_type')},
+            {field: 'putawaySku', sort: true,width:130, title: getI18nAttr('putaway_sku')},
+            {field: 'sku', sort: true,width:130, title: getI18nAttr('basic_sku')},
+            {field: 'expectedQty', sort: true,width:130, title: getI18nAttr('expected_qty')},
+            {field: 'putawayQty', sort: true,width:130, title: getI18nAttr('putaway_qty')},
+            {field: 'receivedQty', sort: true,width:130, title: getI18nAttr('received_qty')},
+            {field: 'inboundStatusDesc', sort: true,width:135, title: getI18nAttr('inbound_status')},
+            {field: 'linestatusDesc', sort: true,width:130, title: getI18nAttr('line_status')},
+            {field: 'inboundTime', sort: true, width:190, title: getI18nAttr('inbound_time')},
+            {field: 'putawayTime', sort: true, width:190, title: getI18nAttr('putaway_time')},
+            {field: 'receivedTime', sort: true, width:190, title: getI18nAttr('received_time')},
+
+
+
+
+
+
+
         ]]
     });
 
@@ -55,7 +68,7 @@ function ship(referenceNo) {
     layer.confirm(getI18nAttr('confirm'), function (index) {
         layer.close(index);
         layer.load(2);
-        $.post("/servlet/outbound/ship", {
+        $.post("/servlet/inbound/ship", {
             token: getToken(),
             referenceNo:referenceNo
         }, function (data) {
@@ -88,7 +101,7 @@ function doSearch(table) {
             limit:10,
             fromDate: fromDate,
             toDate: toDate,
-            omsOrder: $(".search-input").val()
+            orderNo: $(".search-input").val()
         }
     });
 }
@@ -113,7 +126,7 @@ function exportFile() {
     }
 
     var index = layer.load();
-    var url = '/servlet/outbound/export_detail?' + $.param({token: getToken(),fromDate: fromDate,toDate: toDate, offset: 0, limit: 1000});
+    var url = '/servlet/inbound/export_detail?' + $.param({token: getToken(),fromDate: fromDate,toDate: toDate, offset: 0, limit: 1000});
     document.location.href = url;
 
     var intervalIndex = setInterval(function () {

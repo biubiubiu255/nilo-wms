@@ -11,15 +11,21 @@ import com.nilo.wms.common.exception.WMSException;
 import com.nilo.wms.common.util.*;
 import com.nilo.wms.dao.flux.FluxInboundDao;
 import com.nilo.wms.dao.flux.FluxInventoryDao;
+import com.nilo.wms.dao.flux.WMSInboundDetailDao;
 import com.nilo.wms.dao.platform.InboundDao;
 import com.nilo.wms.dao.platform.InboundDetailsDao;
 import com.nilo.wms.dto.SkuInfo;
 import com.nilo.wms.dto.StorageInfo;
+import com.nilo.wms.dto.common.Page;
 import com.nilo.wms.dto.common.PageResult;
 import com.nilo.wms.dto.flux.FLuxRequest;
 import com.nilo.wms.dto.flux.FluxInbound;
 import com.nilo.wms.dto.flux.FluxInboundDetails;
 import com.nilo.wms.dto.flux.FluxResponse;
+import com.nilo.wms.dto.inbound.InboundDetailParam;
+import com.nilo.wms.dto.inbound.ReportInboundDetail;
+import com.nilo.wms.dto.outbound.OutboundDetailParam;
+import com.nilo.wms.dto.outbound.ReportOutboundDetail;
 import com.nilo.wms.dto.platform.inbound.Inbound;
 import com.nilo.wms.dto.platform.inbound.InboundDetail;
 import com.nilo.wms.dto.inbound.InboundHeader;
@@ -64,6 +70,8 @@ public class InboundServiceImpl implements InboundService {
     private FluxInboundDao fluxInboundDao;
     @Autowired
     private SystemService systemService;
+    @Autowired
+    private WMSInboundDetailDao wmsInboundDetailDao;
 
     @Value("#{configProperties['flux_status']}")
     private String flux_status;
@@ -396,6 +404,15 @@ public class InboundServiceImpl implements InboundService {
         pageResult.setData(list);
         return pageResult;
 
+    }
+
+    @Override
+    public List<ReportInboundDetail> findInboundDetail(InboundDetailParam param, Page page) {
+        if(param.getFromDate()==null || param.getToDate()==null){
+            throw new WMSException(BizErrorCode.TIME_PARAM_NOT_EXIST);
+        }
+        page.setCount(wmsInboundDetailDao.queryInboundDetailCount(param));
+        return wmsInboundDetailDao.queryInboundDetail(param, page);
     }
 
 }

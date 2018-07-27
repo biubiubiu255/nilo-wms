@@ -1,14 +1,13 @@
 package com.nilo.wms.dto.inbound;
 
-import com.nilo.wms.common.annotation.Excel;
-import com.nilo.wms.dto.common.Page;
+import com.nilo.wms.dto.outbound.ReportOutboundDetail;
 
 /**
  * User: Alvin
  * Date: 2018/07/16 17:12
- * Just go for it and give it a try
+ * Just go for it and give it a try hhhh wait your beat
  */
-public class OutboundDetailParam extends ReportOutboundDetail {
+public class InboundDetailParam extends ReportInboundDetail {
     private String fromDate;
     private String toDate;
 

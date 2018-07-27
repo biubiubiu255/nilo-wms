@@ -1,4 +1,4 @@
-package com.nilo.wms.dto.inbound;
+package com.nilo.wms.dto.outbound;
 
 import com.nilo.wms.common.annotation.Excel;
 
