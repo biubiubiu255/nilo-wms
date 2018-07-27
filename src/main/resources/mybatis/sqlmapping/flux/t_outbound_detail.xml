@@ -75,11 +75,8 @@
         '订单完成'
         ) wms_status
         FROM
-        act_allocation_details D
-        RIGHT JOIN doc_order_header T ON D .orderno = T .orderno
-        LEFT JOIN doc_loading_details l ON T .orderno = l.orderno
-        LEFT JOIN doc_loading_header H ON l.ldlno = H .ldlno
-        LEFT JOIN t_order_info o ON o.orderno = T .soreference1
+        doc_order_header T
+        left join act_allocation_details D ON D .orderno = T .orderno
         WHERE
         TO_CHAR (T .addtime, 'YYYY-MM-DD') BETWEEN #{param.fromDate}
         AND #{param.toDate}
@@ -87,20 +84,9 @@
             AND T .soreference1 = #{param.omsOrder}
         </if>
         GROUP BY
-        T .orderno,
-        T .soreference1,
-        T .userdefine1,
-        T .addtime,
-        T .sostatus,
-        D .pickedtime,
-        D .checktime,
-        D .shipmenttime,
-        T .channel,
-        H .carrierid,
-        H .driver,
-        H .loadingtotime,
-        o.status,
-        o.edittime
+        T.soreference1,
+        T.addtime,
+        T.sostatus
         ORDER BY
         T .addtime
         ) A
