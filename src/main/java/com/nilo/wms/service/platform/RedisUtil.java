@@ -43,7 +43,7 @@ public class RedisUtil {
     public static void tryGetDistributedLock(String lockKey, String requestId) {
 
         try (Jedis jedis = jedisPool.getResource()) {
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 100; i++) {
                 String result = jedis.set(lockKey, requestId, SET_IF_NOT_EXIST, SET_WITH_EXPIRE_TIME, 1000);
                 if (LOCK_SUCCESS.equals(result)) {
                     return;
