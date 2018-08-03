@@ -8,6 +8,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.util.Collections;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -31,6 +32,8 @@ public class RedisUtil {
     private static final Long RELEASE_SUCCESS = 1L;
     public static final String LOCK_KEY = "wms_redis_lock_key";
 
+    private static final int TIME_OUT = 3000;
+
     private static JedisPool jedisPool = SpringContext.getBean("jedisPool", JedisPool.class);
 
     /**
@@ -43,16 +46,22 @@ public class RedisUtil {
     public static void tryGetDistributedLock(String lockKey, String requestId) {
 
         try (Jedis jedis = jedisPool.getResource()) {
-            for (int i = 0; i < 100; i++) {
-                String result = jedis.set(lockKey, requestId, SET_IF_NOT_EXIST, SET_WITH_EXPIRE_TIME, 1000);
+
+            long end = System.currentTimeMillis() + TIME_OUT;
+            while (System.currentTimeMillis() < end) {
+                String result = jedis.set(lockKey, requestId, SET_IF_NOT_EXIST, SET_WITH_EXPIRE_TIME, TIME_OUT);
                 if (LOCK_SUCCESS.equals(result)) {
                     return;
                 } else {
-                    Thread.yield();
+                    try {
+                        Thread.sleep(10 + (int) Math.random() * 10);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
             }
+            throw new WMSException(SysErrorCode.SYSTEM_ERROR);
         }
-        throw new WMSException(SysErrorCode.SYSTEM_ERROR);
     }
 
     /**
@@ -62,6 +71,7 @@ public class RedisUtil {
      * @param requestId 请求标识
      * @return 是否释放成功
      */
+
     public static boolean releaseDistributedLock(String lockKey, String requestId) {
 
         try (Jedis jedis = jedisPool.getResource()) {
