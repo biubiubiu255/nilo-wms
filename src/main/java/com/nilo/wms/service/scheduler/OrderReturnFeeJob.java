@@ -36,7 +36,7 @@ public class OrderReturnFeeJob implements Job {
                 //查询入库
                 FeeService feeService = SpringContext.getBean(FeeService.class);
 
-                List<Fee> list = feeService.queryOrderReturnHandlerFee("kilimall", dateString);
+                List<Fee> list = feeService.queryOrderReturnHandlerFee("kilimall", dateString, dateString);
 
                 //按店铺推送
                 Map<String, List<Fee>> map = new HashMap<>();

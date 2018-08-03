@@ -14,11 +14,11 @@ public interface WMSFeeDao {
 
     List<FeeDO> queryStorage(@Param(value = "customerId") String customerId, @Param(value = "warehouseId")String warehouseId);
 
-    List<FeeDO> queryInBoundOrderHandler(@Param(value = "customerId") String customerId, @Param(value = "warehouseId")String warehouseId, @Param(value = "date")String date);
+    List<FeeDO> queryInBoundOrderHandler(@Param(value = "customerId") String customerId, @Param(value = "warehouseId")String warehouseId, @Param(value = "fromDate")String fromDate, @Param(value = "toDate")String toDate);
 
-    List<FeeDO> queryOrderHandler(@Param(value = "customerId") String customerId, @Param(value = "warehouseId")String warehouseId, @Param(value = "date")String date);
+    List<FeeDO> queryOrderHandler(@Param(value = "customerId") String customerId, @Param(value = "warehouseId")String warehouseId, @Param(value = "fromDate")String fromDate, @Param(value = "toDate")String toDate);
 
-    List<FeeDO> queryOrderReturn(@Param(value = "customerId") String customerId, @Param(value = "warehouseId")String warehouseId, @Param(value = "date")String date);
+    List<FeeDO> queryOrderReturn(@Param(value = "customerId") String customerId, @Param(value = "warehouseId")String warehouseId, @Param(value = "fromDate")String fromDate, @Param(value = "toDate")String toDate);
 
-    List<FeeDO> queryReturnMerchant(@Param(value = "customerId") String customerId, @Param(value = "warehouseId")String warehouseId, @Param(value = "date")String date);
+    List<FeeDO> queryReturnMerchant(@Param(value = "customerId") String customerId, @Param(value = "warehouseId")String warehouseId, @Param(value = "fromDate")String fromDate, @Param(value = "toDate")String toDate);
 }

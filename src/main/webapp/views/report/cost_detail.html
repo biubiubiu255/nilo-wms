@@ -1,0 +1,27 @@
+
+
+<div class="content-header">
+	<span class="layui-breadcrumb">
+	  <a href="#!home"><span i18n="home_page"></span></a>
+	  <a><cite><span i18n="report_cost_detail"></span> </cite></a>
+	</span>
+    <div class="layui-form toolbar" id="toolList">
+
+<!--        <span i18n="oms_order"></span>：
+        <input id="searchValue" class="layui-input search-input" type="text"/>&emsp;-->
+        <div class="layui-inline">
+            <label class="layui-form-label"><span i18n="date_range"></span></label>
+            <div class="layui-input-inline">
+                <input type="text" class="layui-input" id="date_range" placeholder=" - " style="width: 200px;">
+            </div>
+        </div>
+        <button id="searchBtn" class="layui-btn search-btn" permission="30051"><i class="layui-icon">&#xe615;</i><span i18n="search"/></button>
+        <button class="layui-btn layui-btn-normal btn-export">Export</button>
+    </div>
+
+</div>
+
+<table class="layui-table" id="table" lay-filter="table"></table>
+
+
+<script type="text/javascript" src="/static/js/report/cost_detail.js"></script>

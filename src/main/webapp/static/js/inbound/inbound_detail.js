@@ -101,7 +101,8 @@ function doSearch(table) {
             limit:10,
             fromDate: fromDate,
             toDate: toDate,
-            orderNo: $(".search-input").val()
+            orderNo: $("#searchValue").val(),
+            sku: $("#searchValueOfSku").val(),
         }
     });
 }

@@ -35,7 +35,7 @@ public class OrderHandleFeeJob implements Job {
                 String dateString = new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime());
                 //查询入库
                 FeeService feeService = SpringContext.getBean(FeeService.class);
-                List<Fee> list = feeService.queryOrderHandlerFee("kilimall", dateString);
+                List<Fee> list = feeService.queryOrderHandlerFee("kilimall", dateString, dateString);
                 //按店铺推送
                 Map<String, List<Fee>> map = new HashMap<>();
                 for (Fee f : list) {

@@ -41,7 +41,7 @@ public class InBoundFeeJob implements Job {
 
                 FeeService feeService = SpringContext.getBean(FeeService.class);
 
-                List<Fee> list = feeService.queryInboundOrder(clientCode, dateString);
+                List<Fee> list = feeService.queryInboundOrder(clientCode, dateString, dateString);
 
                 //按店铺推送
                 Map<String, List<Fee>> map = new HashMap<>();

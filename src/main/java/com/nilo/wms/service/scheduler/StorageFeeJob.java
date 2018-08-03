@@ -36,7 +36,7 @@ public class StorageFeeJob implements Job {
                 String clientCode = "kilimall";
                 FeeService feeService = SpringContext.getBean(FeeService.class);
 
-                List<Fee> list = feeService.queryStorageFee(clientCode, dateString);
+                List<Fee> list = feeService.queryStorageFee(clientCode);
                 //按店铺推送
                 Map<String, List<Fee>> map = new HashMap<>();
                 for (Fee f : list) {
