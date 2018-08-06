@@ -49,7 +49,7 @@
                 AND TO_CHAR (A.addtime, 'YYYY-MM-DD') BETWEEN #{param.fromDate}
                 AND #{param.toDate}
             </if>
-            INNER JOIN ACT_Transaction_Log c ON c.docno = A .ASNNO AND b.sku = c.fmsku
+            LEFT JOIN ACT_Transaction_Log c ON c.docno = A .ASNNO AND b.sku = c.fmsku
             AND c.transactionType = 'PA'
             WHERE ROWNUM <![CDATA[ <= ]]> #{page.limit}
         ) d
@@ -70,7 +70,7 @@
             AND TO_CHAR (A.addtime, 'YYYY-MM-DD') BETWEEN #{param.fromDate}
             AND #{param.toDate}
         </if>
-        INNER JOIN ACT_Transaction_Log c ON c.docno = A .ASNNO AND b.sku = c.fmsku
+        LEFT JOIN ACT_Transaction_Log c ON c.docno = A .ASNNO AND b.sku = c.fmsku
         AND c.transactionType = 'PA'
 
     </select>
