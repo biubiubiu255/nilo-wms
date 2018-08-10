@@ -29,9 +29,9 @@ $(function () {
         cols: [[
             {type: 'numbers'},
             {field: 'omsOrder', sort: true, title: getI18nAttr('oms_order')},
-            {field: 'orderCheckTime', sort: true, title: getI18nAttr('order_check_time')},
             {field: 'orderIssueTime', sort: true, title: getI18nAttr('order_issue_time')},
             {field: 'orderPickingTime', sort: true, title: getI18nAttr('order_picking_time')},
+            {field: 'orderCheckTime', sort: true, title: getI18nAttr('order_check_time')},
             {field: 'orderLoadingTime', sort: true, title: getI18nAttr('order_loading_time')},
             {field: 'wmsStatus', sort: true, title: getI18nAttr('status')}
         ]]

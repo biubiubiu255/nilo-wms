@@ -30,16 +30,15 @@ $(function () {
             {type: 'numbers'},
             {field: 'orderNo', sort: true, width:200, title: getI18nAttr('waybill')},
             {field: 'inboundType', sort: true,width:130, title: getI18nAttr('inbound_type')},
-            {field: 'putawaySku', sort: true,width:130, title: getI18nAttr('putaway_sku')},
             {field: 'sku', sort: true,width:130, title: getI18nAttr('basic_sku')},
             {field: 'expectedQty', sort: true,width:130, title: getI18nAttr('expected_qty')},
-            {field: 'putawayQty', sort: true,width:130, title: getI18nAttr('putaway_qty')},
             {field: 'receivedQty', sort: true,width:130, title: getI18nAttr('received_qty')},
+            {field: 'putawayQty', sort: true,width:130, title: getI18nAttr('putaway_qty')},
             {field: 'inboundStatusDesc', sort: true,width:135, title: getI18nAttr('inbound_status')},
             {field: 'linestatusDesc', sort: true,width:130, title: getI18nAttr('line_status')},
             {field: 'inboundTime', sort: true, width:190, title: getI18nAttr('inbound_time')},
-            {field: 'putawayTime', sort: true, width:190, title: getI18nAttr('putaway_time')},
             {field: 'receivedTime', sort: true, width:190, title: getI18nAttr('received_time')},
+            {field: 'putawayTime', sort: true, width:190, title: getI18nAttr('putaway_time')},
 
 
 
