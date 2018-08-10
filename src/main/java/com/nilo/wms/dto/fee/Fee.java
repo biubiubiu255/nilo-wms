@@ -1,14 +1,16 @@
 package com.nilo.wms.dto.fee;
 
+import com.nilo.wms.common.annotation.Excel;
+
 /**
  * Created by Administrator on 2017/6/9.
  */
 public class Fee {
 
+    private String charge_type; //
 
-    private String charge_type;
-
-    private String money_type;
+    @Excel(name = "MoneyType", order = 2)
+    private String money_type;  //
 
     private String factor1;
 
@@ -24,13 +26,17 @@ public class Fee {
 
     private String order_no;
 
-    private String order_sn;
+    @Excel(name = "OrderSn", order = 3)
+    private String order_sn;//
 
-    private String store_id;
+    @Excel(name = "StoreId", order = 4)
+    private String store_id;//
 
-    private String store_name;
+    @Excel(name = "StoreName", order = 5)
+    private String store_name;//
 
-    private double receivable_money;
+    @Excel(name = "ReceivableMoney", order = 6)
+    private double receivable_money;//
 
     private double real_money;
 
@@ -59,6 +65,9 @@ public class Fee {
     private String sku;
 
     private int qty;
+
+    @Excel(name = "CreatedTime", order = 7)
+    private String createdTimeDesc;
 
     public String getCharge_type() {
         return charge_type;
@@ -274,5 +283,13 @@ public class Fee {
 
     public void setQty(int qty) {
         this.qty = qty;
+    }
+
+    public String getCreatedTimeDesc() {
+        return createdTimeDesc;
+    }
+
+    public void setCreatedTimeDesc(String createdTimeDesc) {
+        this.createdTimeDesc = createdTimeDesc;
     }
 }

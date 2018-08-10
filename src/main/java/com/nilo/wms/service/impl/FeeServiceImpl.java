@@ -3,6 +3,7 @@ package com.nilo.wms.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.nilo.wms.common.Principal;
 import com.nilo.wms.common.SessionLocal;
+import com.nilo.wms.common.enums.MoneyType;
 import com.nilo.wms.common.exception.BizErrorCode;
 import com.nilo.wms.common.exception.WMSException;
 import com.nilo.wms.common.util.StringUtil;
@@ -38,7 +39,7 @@ public class FeeServiceImpl implements FeeService {
     private SystemService systemService;
 
     @Override
-    public List<Fee> queryStorageFee(String clientCode, String date) {
+    public List<Fee> queryStorageFee(String clientCode) {
         List<Fee> resultList = new ArrayList<>();
         ClientConfig config = SystemConfig.getClientConfig().get(clientCode);
         if (config == null) {
@@ -50,6 +51,7 @@ public class FeeServiceImpl implements FeeService {
             Fee f = new Fee();
             f.setStore_id(d.getStoreId());
             f.setFactor1(d.getCategories());
+            f.setMoney_type(MoneyType.Return_Merchant.getDesc());
 
             f.setFactor2(getFactor2(clientCode, "storage", d));
             f.setClass_id(d.getCategories());
@@ -63,23 +65,26 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
-    public List<Fee> queryInboundOrder(String clientCode, String date) {
+    public List<Fee> queryInboundOrder(String clientCode, String fromDate, String toDate) {
         List<Fee> resultList = new ArrayList<>();
         ClientConfig config = SystemConfig.getClientConfig().get(clientCode);
         if (config == null) {
             throw new WMSException(BizErrorCode.APP_KEY_NOT_EXIST);
         }
-        List<FeeDO> list = feeDao.queryInBoundOrderHandler(config.getCustomerCode(), config.getWarehouseCode(), date);
+        List<FeeDO> list = feeDao.queryInBoundOrderHandler(config.getCustomerCode(), config.getWarehouseCode(), fromDate, toDate);
         for (FeeDO o : list) {
             Fee f = new Fee();
             f.setOrder_sn(o.getOrderNo());
             f.setOrder_no(o.getNo());
+            f.setMoney_type(MoneyType.Return_Merchant.getDesc());
             f.setClass_id(o.getCategories());
             f.setStore_id(o.getStoreId());
             f.setStore_name(o.getStoreDesc());
             f.setFactor1(o.getCategories());
             f.setSku(o.getSku());
             f.setQty(o.getQty());
+            f.setCreatedTimeDesc(o.getCreatedTimeDesc());
+
 
             f.setFactor2(getFactor2(clientCode, "inbound", o));
 
@@ -91,7 +96,7 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
-    public List<Fee> queryOrderHandlerFee(String clientCode, String date) {
+    public List<Fee> queryOrderHandlerFee(String clientCode, String fromDate, String toDate) {
         List<Fee> resultList = new ArrayList<>();
 
         ClientConfig config = SystemConfig.getClientConfig().get(clientCode);
@@ -99,7 +104,7 @@ public class FeeServiceImpl implements FeeService {
             throw new WMSException(BizErrorCode.APP_KEY_NOT_EXIST);
         }
 
-        List<FeeDO> list = feeDao.queryOrderHandler(config.getCustomerCode(), config.getWarehouseCode(), date);
+        List<FeeDO> list = feeDao.queryOrderHandler(config.getCustomerCode(), config.getWarehouseCode(), fromDate, toDate);
 
         Map<String, String> categoriesMap = new HashMap<>();
 
@@ -107,11 +112,13 @@ public class FeeServiceImpl implements FeeService {
             Fee f = new Fee();
             f.setOrder_sn(o.getOrderNo());
             f.setOrder_no(o.getNo());
+            f.setMoney_type(MoneyType.Return_Merchant.getDesc());
             f.setStore_id(o.getStoreId());
             f.setStore_name(o.getStoreDesc());
             f.setFactor1(o.getCategories());
             f.setSku(o.getSku());
             f.setQty(o.getQty());
+            f.setCreatedTimeDesc(o.getCreatedTimeDesc());
 
             f.setFactor2(getFactor2(clientCode, "handle", o));
             f.setClass_id(o.getCategories());
@@ -130,25 +137,26 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
-    public List<Fee> queryOrderReturnHandlerFee(String clientCode, String date) {
+    public List<Fee> queryOrderReturnHandlerFee(String clientCode, String fromDate, String toDate) {
         List<Fee> resultList = new ArrayList<>();
         ClientConfig config = SystemConfig.getClientConfig().get(clientCode);
         if (config == null) {
             throw new WMSException(BizErrorCode.APP_KEY_NOT_EXIST);
         }
-        List<FeeDO> list = feeDao.queryOrderReturn(config.getCustomerCode(), config.getWarehouseCode(), date);
+        List<FeeDO> list = feeDao.queryOrderReturn(config.getCustomerCode(), config.getWarehouseCode(), fromDate, toDate);
 
         Map<String, String> categoriesMap = new HashMap<>();
         for (FeeDO o : list) {
             Fee f = new Fee();
             f.setOrder_sn(o.getOrderNo());
             f.setOrder_no(o.getNo());
+            f.setMoney_type(MoneyType.Return_Merchant.getDesc());
             f.setStore_id(o.getStoreId());
             f.setStore_name(o.getStoreDesc());
             f.setFactor1(o.getCategories());
             f.setSku(o.getSku());
             f.setQty(o.getQty());
-
+            f.setCreatedTimeDesc(o.getCreatedTimeDesc());
             f.setFactor2(getFactor2(clientCode, "return", o));
             f.setClass_id(o.getCategories());
 
@@ -166,15 +174,16 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
-    public List<Fee> queryReturnMerchantHandlerFee(String clientCode, String date) {
+    public List<Fee> queryReturnMerchantHandlerFee(String clientCode, String fromDate, String toDate) {
         List<Fee> resultList = new ArrayList<>();
         ClientConfig config = SystemConfig.getClientConfig().get(clientCode);
         if (config == null) {
             throw new WMSException(BizErrorCode.APP_KEY_NOT_EXIST);
         }
-        List<FeeDO> list = feeDao.queryReturnMerchant(config.getCustomerCode(), config.getWarehouseCode(), date);
+        List<FeeDO> list = feeDao.queryReturnMerchant(config.getCustomerCode(), config.getWarehouseCode(), fromDate, toDate);
         for (FeeDO o : list) {
             Fee f = new Fee();
+            f.setMoney_type(MoneyType.Return_Merchant.getDesc());
             f.setOrder_sn(o.getOrderNo());
             f.setOrder_no(o.getNo());
             f.setStore_id(o.getStoreId());
@@ -182,7 +191,7 @@ public class FeeServiceImpl implements FeeService {
             f.setFactor1(o.getCategories());
             f.setQty(o.getQty());
             f.setSku(o.getSku());
-
+            f.setCreatedTimeDesc(o.getCreatedTimeDesc());
             f.setFactor2(getFactor2(clientCode, "return_merchant", o));
             f.setClass_id(o.getCategories());
 

@@ -21,6 +21,8 @@ public class FeeDO {
 
     private int qty;
 
+    private String createdTimeDesc;
+
     public String getNo() {
         return no;
     }
@@ -86,5 +88,11 @@ public class FeeDO {
         this.storeDesc = storeDesc;
     }
 
+    public String getCreatedTimeDesc() {
+        return createdTimeDesc;
+    }
 
+    public void setCreatedTimeDesc(String createdTimeDesc) {
+        this.createdTimeDesc = createdTimeDesc;
+    }
 }

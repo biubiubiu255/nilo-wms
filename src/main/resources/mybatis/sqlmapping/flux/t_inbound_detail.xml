@@ -44,11 +44,12 @@
             doc_asn_header A
             INNER JOIN DOC_ASN_DETAILS b ON A .ASNNO = b.ASNNO
             <if test="param.orderNo!=null and param.orderNo!=''">AND A.ASNREFERENCE1 = #{param.orderNo} </if>
+            <if test="param.sku!=null and param.sku!=''">AND b.sku = #{param.sku} </if>
             <if test="param.fromDate!=null and param.fromDate!=''">
                 AND TO_CHAR (A.addtime, 'YYYY-MM-DD') BETWEEN #{param.fromDate}
                 AND #{param.toDate}
             </if>
-            INNER JOIN ACT_Transaction_Log c ON c.docno = A .ASNNO AND b.sku = c.fmsku
+            LEFT JOIN ACT_Transaction_Log c ON c.docno = A .ASNNO AND b.sku = c.fmsku
             AND c.transactionType = 'PA'
             WHERE ROWNUM <![CDATA[ <= ]]> #{page.limit}
         ) d
@@ -64,11 +65,12 @@
         doc_asn_header A
         INNER JOIN DOC_ASN_DETAILS b ON A .ASNNO = b.ASNNO
         <if test="param.orderNo!=null and param.orderNo!=''">AND A.ASNREFERENCE1 = #{param.orderNo} </if>
+        <if test="param.sku!=null and param.sku!=''">AND b.sku = #{param.sku} </if>
         <if test="param.fromDate!=null and param.fromDate!=''">
             AND TO_CHAR (A.addtime, 'YYYY-MM-DD') BETWEEN #{param.fromDate}
             AND #{param.toDate}
         </if>
-        INNER JOIN ACT_Transaction_Log c ON c.docno = A .ASNNO AND b.sku = c.fmsku
+        LEFT JOIN ACT_Transaction_Log c ON c.docno = A .ASNNO AND b.sku = c.fmsku
         AND c.transactionType = 'PA'
 
     </select>

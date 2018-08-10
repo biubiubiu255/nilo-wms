@@ -18,6 +18,8 @@
                 jdbcType="VARCHAR" />
         <result property="qty" column="qty" javaType="java.lang.Integer"
                 jdbcType="VARCHAR" />
+        <result property="createdTimeDesc" column="created_time_desc" javaType="java.lang.String"
+                jdbcType="VARCHAR" />
     </resultMap>
 
     <select id="queryStorage" resultMap="orderHandlerDO">
@@ -36,7 +38,8 @@
         b.sku_group7      storeId,
         c.descr_c         storeDesc,
         s.sku           sku,
-        s.receivedqty_each     qty
+        s.receivedqty_each     qty,
+        to_char(t.edittime, 'yyyy-MM-dd HH24:mi:ss') created_time_desc
         from doc_asn_header t
         left join doc_asn_details s on t.asnno = s.asnno
         left join bas_sku b
@@ -45,7 +48,8 @@
         on b.sku_group7 = c.customerid
         where t.customerId=#{customerId} and t.warehouseId=#{warehouseId}
         and t.asntype = 'PO'
-        and to_char(t.edittime,'yyyy-MM-dd') = #{date}
+        and t.edittime >= to_date(#{fromDate},'yyyy-MM-dd')
+        and t.edittime <![CDATA[ <= ]]> to_date(#{toDate},'yyyy-MM-dd')
         and t.asnstatus = '99'
     </select>
 
@@ -57,7 +61,8 @@
         b.sku_group7  storeId,
         c.descr_c     storeDesc,
         a.sku sku,
-        a.qty qty
+        a.qty qty,
+        to_char(a.checktime, 'yyyy-MM-dd HH24:mi:ss') created_time_desc
         from act_allocation_details a
         left join doc_order_header d
         on a.orderno = d.orderno
@@ -67,7 +72,8 @@
         on b.sku_group7 = c.customerid
 
         where d.customerId=#{customerId} and d.warehouseId=#{warehouseId}
-        and to_char(a.checktime, 'yyyy-MM-dd') = #{date}
+        and a.checktime >= to_date(#{fromDate},'yyyy-MM-dd')
+        and a.checktime <![CDATA[ <= ]]> to_date(#{toDate},'yyyy-MM-dd')
         and d.ordertype = 'SELL'
         order by a.orderno
 
@@ -81,7 +87,8 @@
                    b.sku_group7      storeId,
                    c.descr_c         storeDesc,
                    s.sku           sku,
-                   s.receivedqty_each     qty
+                   s.receivedqty_each     qty,
+                   to_char(t.edittime, 'yyyy-MM-dd HH24:mi:ss') created_time_desc
               from doc_asn_header t
               left join doc_asn_details s on t.asnno = s.asnno
               left join bas_sku b
@@ -91,7 +98,8 @@
              where  t.customerId=#{customerId} and t.warehouseId=#{warehouseId}
                and t.asntype in ( 'TH','JS','TR')
                and t.asnstatus = '99'
-               and to_char(t.edittime, 'yyyy-MM-dd') = #{date}
+               and t.edittime >= to_date(#{fromDate},'yyyy-MM-dd')
+               and t.edittime <![CDATA[ <= ]]> to_date(#{toDate},'yyyy-MM-dd')
              order by b.sku_group7
     </select>
 
@@ -103,7 +111,8 @@
         b.sku_group7  storeId,
         c.descr_c     storeDesc,
         a.sku sku,
-        a.qty qty
+        a.qty qty,
+        to_char(a.checktime, 'yyyy-MM-dd HH24:mi:ss') created_time_desc
         from act_allocation_details a
         left join doc_order_header d
         on a.orderno = d.orderno
@@ -111,7 +120,9 @@
         on a.sku = b.sku
         left join bas_customer c
         on b.sku_group7 = c.customerid
-        where to_char(a.checktime, 'yyyy-MM-dd') = #{date}
+        where
+         a.checktime >= to_date(#{fromDate},'yyyy-MM-dd')
+        and a.checktime <![CDATA[ <= ]]> to_date(#{toDate},'yyyy-MM-dd')
         and d.ordertype = 'CT'
         order by a.orderno
     </select>

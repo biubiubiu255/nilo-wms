@@ -36,7 +36,7 @@ public class ReturnMerchantJob implements Job {
                 //查询入库
                 FeeService feeService = SpringContext.getBean(FeeService.class);
 
-                List<Fee> list = feeService.queryReturnMerchantHandlerFee("kilimall", dateString);
+                List<Fee> list = feeService.queryReturnMerchantHandlerFee("kilimall", dateString, dateString);
                 //写入 nos
                 //按店铺推送
                 Map<String, List<Fee>> map = new HashMap<>();

@@ -8,8 +8,12 @@ import com.nilo.wms.common.util.StringUtil;
 import com.nilo.wms.dao.flux.FluxReportDao;
 import com.nilo.wms.dto.common.Page;
 import com.nilo.wms.dto.common.ResultMap;
+import com.nilo.wms.dto.fee.Fee;
 import com.nilo.wms.dto.flux.InventoryLocation;
 import com.nilo.wms.dto.flux.StaffWork;
+import com.nilo.wms.dto.outbound.OutboundDetailParam;
+import com.nilo.wms.dto.outbound.ReportOutboundDetail;
+import com.nilo.wms.service.FeeService;
 import com.nilo.wms.web.BaseController;
 import org.apache.commons.beanutils.MethodUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -18,6 +22,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -32,6 +37,9 @@ public class FluxReportController extends BaseController {
 
     @Autowired
     private FluxReportDao fluxReportDao;
+
+    @Autowired
+    private FeeService feeService;
 
     @RequiresPermissions("3001")
     @GetMapping("/daily_pick")
@@ -206,5 +214,46 @@ public class FluxReportController extends BaseController {
         }
 
         return locationList;
+    }
+
+    @RequiresPermissions("30051")
+    @PostMapping("/cost_detail")
+    @ResponseBody
+    public String cost_detail(String fromDate, String toDate) {
+
+        List<Fee> list = new ArrayList<Fee>();
+        list.addAll(feeService.queryInboundOrder("kilimall", fromDate, toDate));
+        list.addAll(feeService.queryOrderHandlerFee("kilimall", fromDate, toDate));
+        list.addAll(feeService.queryOrderReturnHandlerFee("kilimall", fromDate, toDate));
+        list.addAll(feeService.queryReturnMerchantHandlerFee("kilimall", fromDate, toDate));
+        return toLayUIData(list.size(), list);
+    }
+
+    @ResponseBody
+    @GetMapping("/export_cost_detail")
+    @RequiresPermissions("30052")
+    public String exportDetail(String fromDate, String toDate, HttpServletResponse response) throws IOException {
+
+        List<Fee> list = new ArrayList<Fee>();
+        list.addAll(feeService.queryInboundOrder("kilimall", fromDate, toDate));
+        list.addAll(feeService.queryOrderHandlerFee("kilimall", fromDate, toDate));
+        list.addAll(feeService.queryOrderReturnHandlerFee("kilimall", fromDate, toDate));
+        list.addAll(feeService.queryReturnMerchantHandlerFee("kilimall", fromDate, toDate));
+
+        HSSFWorkbook wb = new HSSFWorkbook();
+        ExportExcel exportExcel = new ExportExcel(wb);
+
+        exportExcel.fillData(list, Fee.class);
+        String path = System.getProperty("user.home") + File.separator + "temp" + File.separator;
+        String fileName = IdWorker.getInstance().nextId() + "";
+        response.reset();
+        Cookie cookie = new Cookie("downStatus", "complete");
+        cookie.setPath("/");
+        response.addCookie(cookie);
+        response.setContentType("application/vnd.ms-excel;charset=utf-8");
+        response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xls");
+        ServletOutputStream outputStream = response.getOutputStream();
+        exportExcel.exportWrite(outputStream);
+        return null;
     }
 }
