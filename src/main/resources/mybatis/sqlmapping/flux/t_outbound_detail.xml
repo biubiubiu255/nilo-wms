@@ -29,22 +29,10 @@
         (
         SELECT
         T .soreference1 oms_order,
-        TO_CHAR (
-        T .addtime,
-        'yyyy-MM-dd hh:mm'
-        ) order_issue_time,
-        TO_CHAR (
-        MAX (D .pickedtime),
-        'yyyy-MM-dd hh:mm'
-        ) order_picking_time,
-        TO_CHAR (
-        MAX (D .checktime),
-        'yyyy-MM-dd hh:mm'
-        ) order_check_time,
-        TO_CHAR (
-        MAX (D .shipmenttime),
-        'yyyy-MM-dd hh:mm'
-        ) order_loading_time,
+        T .addtime order_issue_time,
+        MAX (D .pickedtime) order_picking_time,
+        MAX (D .checktime) order_check_time,
+        MAX (D .shipmenttime) order_loading_time,
         DECODE (
         T .sostatus,
         '00',
@@ -88,7 +76,7 @@
         T.addtime,
         T.sostatus
         ORDER BY
-        T .addtime
+        T .addtime desc
         ) A
         WHERE
         ROWNUM <![CDATA[ <= ]]> #{page.limit}

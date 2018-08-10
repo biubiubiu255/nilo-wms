@@ -10,13 +10,13 @@ import com.nilo.wms.common.annotation.Excel;
 public class ReportOutboundDetail {
     @Excel(name = "OmsOrder", order = 1)
     private String omsOrder;
-    @Excel(name = "OrderIssueTime", order = 2)
+    @Excel(name = "AddTime", order = 2)
     private String orderIssueTime;
-    @Excel(name = "OrderPickingTime", order = 3)
+    @Excel(name = "PickTime", order = 3)
     private String orderPickingTime;
-    @Excel(name = "OrderCheckTime", order = 4)
+    @Excel(name = "CheckTime", order = 4)
     private String orderCheckTime;
-    @Excel(name = "OrderLoadingTime", order = 5)
+    @Excel(name = "ShipTime", order = 5)
     private String orderLoadingTime;
     @Excel(name = "WmsStatus", order = 6)
     private String wmsStatus;
