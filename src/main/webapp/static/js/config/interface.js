@@ -18,6 +18,7 @@ $(function () {
             {field: 'method', sort: true, title: getI18nAttr('config_interface_method')},
             {field: 'url', sort: true, title: getI18nAttr('config_interface_url')},
             {field: 'requestMethod', sort: true, title: getI18nAttr('config_interface_request_method')},
+            {field: 'status', sort: true,templet: '#statusTpl', title: getI18nAttr('status')},
             {
                 field: 'createdTime', sort: true, templet: function (d) {
                 return layui.util.toDateString(d.createdTime * 1000);
@@ -67,7 +68,33 @@ $(function () {
     $("#refreshBtn").click(function () {
         refreshConfig();
     });
+
+    //监听状态开关操作
+    layui.form.on('switch(statusCB)', function (obj) {
+        updateStatus(obj);
+    });
 });
+
+//更改状态
+function updateStatus(obj) {
+    var load = layer.load(2);
+    var newStatus = obj.elem.checked ? 1 : 0;
+    $.post("/servlet/interface/status", {
+        bizType: obj.elem.value,
+        status: newStatus,
+        _method: "PUT",
+        token: getToken()
+    }, function (data) {
+        layer.close(load);
+        if (data.status == 'succ') {
+            layui.table.reload('table', {});
+        } else {
+            layer.msg(data.error, {icon: 2, time: 2000}, function () {
+                layui.table.reload('table', {});
+            });
+        }
+    },"json");
+}
 
 //显示表单弹窗
 function showEditModel(data) {

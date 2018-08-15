@@ -25,6 +25,7 @@ public class InterfaceController extends BaseController {
     private InterfaceConfigDao interfaceConfigDao;
     @Autowired
     private SystemService systemService;
+
     @GetMapping
     @RequiresPermissions("50021")
     public String list() {
@@ -42,6 +43,7 @@ public class InterfaceController extends BaseController {
         interfaceConfigDao.update(interfaceConfig);
         return ResultMap.success().toJson();
     }
+
     @PostMapping("/refresh")
     @RequiresPermissions("50023")
     public String refresh() {
@@ -50,5 +52,20 @@ public class InterfaceController extends BaseController {
         return ResultMap.success().toJson();
     }
 
+    @PutMapping("/status")
+    @RequiresPermissions("50022")
+    public String updateStatus(String bizType, int status) {
+
+        Principal principal = SessionLocal.getPrincipal();
+
+        InterfaceConfig interfaceConfig = new InterfaceConfig();
+        interfaceConfig.setBizType(bizType);
+        interfaceConfig.setStatus(status);
+        interfaceConfig.setClientCode(principal.getClientCode());
+        interfaceConfigDao.update(interfaceConfig);
+
+        return ResultMap.success().toJson();
+
+    }
 
 }

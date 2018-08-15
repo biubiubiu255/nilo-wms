@@ -37,6 +37,8 @@
                 <input name="url" type="text" class="layui-input"  lay-verify="required" required/>
             </div>
         </div>
+
+
         <div class="layui-form-item">
             <label class="layui-form-label"><span i18n="config_interface_request_method"></span></label>
             <div class="layui-input-block">
@@ -57,5 +59,9 @@
             i18n="edit"></span></button>
 
 </div>
-
+<!-- 表格状态列 -->
+<script type="text/html" id="statusTpl">
+    <input type="checkbox" value="{{d.bizType}}" lay-filter="statusCB" lay-skin="switch"
+           lay-text="On|Off" {{ d.status== 1?'checked' : '' }}>
+</script>
 <script type="text/javascript" src="/static/js/config/interface.js"></script>
