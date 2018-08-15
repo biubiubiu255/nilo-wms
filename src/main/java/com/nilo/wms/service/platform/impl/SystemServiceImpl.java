@@ -137,6 +137,9 @@ public class SystemServiceImpl implements SystemService {
 
         ClientConfig clientConfig = SystemConfig.getClientConfig().get(clientCode);
         InterfaceConfig interfaceConfig = SystemConfig.getInterfaceConfig().get(clientCode).get(method);
+        if (interfaceConfig.getStatus().equals(0)) {
+            return;
+        }
 
         Map<String, String> params = new HashMap<>();
         params.put("method", interfaceConfig.getMethod());
